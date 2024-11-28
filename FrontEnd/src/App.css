@@ -1,0 +1,106 @@
+#root { 
+  margin: 0 auto; 
+  width: 100%;
+  background-color: rgb(255, 255, 255);
+}
+
+ 
+#main {
+  padding: 2em;
+  width: 100%;
+  background-color: rgb(175, 133, 214);
+  height: 50em;
+}
+
+nav {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 3em;
+}
+
+
+
+.circle-inner {
+  width: 80%;
+  height: 80%;
+  background-color: rgb(182, 79, 156);
+  border-radius: 50%; 
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+
+}
+
+.row-my {
+  width: 100%;
+  padding: 3em
+}
+
+.circle {
+  width: 23em;
+  height: 23em;
+  background-color: transparent;  
+  border: 0.5em solid rgb(255, 255, 255);  
+  border-radius: 50%;
+  top: 8em;
+  right: 8em;
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+  margin-bottom: 1em;
+}
+.circle img {
+  width: 125%; 
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.col-1, .col-photo {
+  display: flex;
+  justify-content: center;
+  align-items:  center;
+}
+
+ 
+.col-photo { 
+  place-items: end;
+}
+
+.row-my {
+  padding: 1em;
+}
+
+.button-my {
+  margin: 2em;
+  width: 8em;
+  height: 3em;
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 1.5em;
+}
+
+.button-my:hover {
+  background-color: #cfcfcf;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+a:hover{
+  color: rgb(76, 74, 74)
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
