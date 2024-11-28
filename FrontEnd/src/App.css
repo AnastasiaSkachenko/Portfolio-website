@@ -4,13 +4,36 @@
   background-color: rgb(255, 255, 255);
 }
 
- 
-#main {
+
+section {
   padding: 2em;
   width: 100%;
-  background-color: rgb(175, 133, 214);
-  height: 50em;
+
 }
+#main, #projects, #contact {
+  background-color: rgb(175, 133, 214);
+}
+
+
+ 
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 5em;
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+ 
+
+
 
 nav {
   display: flex;
@@ -31,10 +54,7 @@ nav {
   aspect-ratio: 1 / 1;
 }
 
-.row-my {
-  width: 100%;
-  padding: 3em
-}
+ 
 
 .circle {
   width: 23em;
@@ -42,8 +62,6 @@ nav {
   background-color: transparent;  
   border: 0.5em solid rgb(255, 255, 255);  
   border-radius: 50%;
-  top: 8em;
-  right: 8em;
   display: flex;  
   align-items: center;  
   justify-content: center;  
@@ -55,49 +73,67 @@ nav {
 .circle img {
   width: 125%; 
 }
-
-.container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  animation: dropDown 1s ease-out;  
-
-}
-
-.col-1, .col-photo {
-  display: flex;
-  justify-content: center;
-  align-items:  center;
-}
-
  
-.col-photo { 
-  place-items: end;
+a {
+  color: black;
+  text-decoration: none;
 }
 
-@keyframes dropDown {
-  from {
-    opacity: 0;
-    transform: translateY(-50px); /* Start slightly above */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0); /* Settle at its final position */
-  }
+a:hover{
+  color: rgb(76, 74, 74)
+}
+
+.btn-4 {
+  font-size: 1.5em;   
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
 }
 
 
- 
+ul {
+  list-style-type:square;
+}
 
-@media (max-width: 800px) {
+li {
+  margin: 1em;
+}
+
+
+.project-card {
+  margin: 0 15px 15px 30px;
+  padding-bottom: 5px;
+}
+
+.project-card h3 {
+  font-size: 25px;
+  margin-left: 30px;
+}
+
+.project-card li {
+  font-size: 20px;
+  margin-left: 30px;
+}
+
+.fields{
+  min-width: 300px;
+  max-width: 700px;
+}
+
+@media (max-width: 770px) {
   .container {
     padding: 1em;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centers the items vertically */
-    align-items: center; /* Centers the items horizontally */
+    justify-content: center;  
+    align-items: center;  
     gap: 2em;
-  }
+    }
   
    .circle {
     width: 15em;  
@@ -106,15 +142,9 @@ nav {
     margin-bottom: 0em;
   }
 
- 
-
- 
-
   .circle img { 
     object-fit: cover;
   }
-
- 
 
   .text-center {
     text-align: center;
@@ -126,22 +156,11 @@ nav {
   }
 }
 
+@media (max-width: 1070) {
+  circle {
+    width: 17em;
+    height: 17em
+  }
  
-
-
-a {
-  color: black;
-  text-decoration: none;
 }
-
-a:hover{
-  color: rgb(76, 74, 74)
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+ 

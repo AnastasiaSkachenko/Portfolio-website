@@ -1,24 +1,48 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {Button, Row, Col} from 'react-bootstrap' 
+import { Row, Col} from 'react-bootstrap' 
 import './App.css'
+import { useEffect } from 'react';
+ 
 
 
 function App() {
+
+  useEffect(() => {
+    const sections = document.querySelectorAll('.container');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');  
+        }  
+      });
+    }, { threshold: 0.5 }); 
+
+    sections.forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => {
+      sections.forEach((section) => {
+        observer.unobserve(section);
+      });
+    };
+  }, []);
  
+  
   return (
     <>
-      <section id="main">
+      <section id="main"  className='-center' >
         <nav>
           <a href='#about-me'>About me</a>
           <a href='#contact' >Contact me</a>
         </nav>
-        <div className="container">
-          <Row className="align-items-center mb-5">
-            <Col xs={0} md={1} lg={1} ></Col>
-            <Col xs={12} md={5} lg={7} className="text-center text-md-start">
-              <h3 className="display-5 fw-bold">Front-end Developer</h3>
+        <div className="container p-md-0  mx-md-4 py-lg-5  ">
+          <Row className="align-items-center   mb-md-5 ">
+             <Col xs={12} md={7} lg={7} className="d-flex justify-content-center">
+              <h3 className="display-4 display-md-5 justify-content-center fw-bold">Front-end Developer</h3>
             </Col>
-            <Col xs={12} md={6} lg={4} className="d-flex justify-content-center">
+            <Col xs={12} md={5} lg={5} className="d-flex justify-content-center pl-md-2 ">
               <div className="circle">
                 <div className="circle-inner">
                   <img src="./me.PNG" alt="Profile" />
@@ -26,13 +50,12 @@ function App() {
               </div>
             </Col>
           </Row>
-          <Row className="align-items-center mt-5">
-            <Col xs={0} md={2} lg={2} ></Col>
-            <Col xs={12} md={4} lg={6} className="d-flex justify-content-center justify-content-md-start gap-3">
-              <Button variant="outline-dark" size="lg">Skills</Button>
-              <Button variant="outline-dark" size="lg">Projects</Button>
+          <Row className="align-items-center  mt-5">
+             <Col xs={12} md={7} lg={7} className="d-flex justify-content-center   gap-3">
+              <a href="#skills" className="btn btn-4 btn-dark px-4 py-2">Skills</a>
+              <a href="#projects" className="btn btn-4 btn-dark px-4 py-2">Projects</a>
             </Col>
-            <Col xs={12} md={6} lg={4} className="text-center">
+            <Col xs={12} md={5} lg={5} className=" justify-content-center">
               <h3 className="text-center">I am Anastasiia Skachenko</h3>
             </Col>
           </Row>
@@ -40,21 +63,205 @@ function App() {
 
       </section>
 
-      <section id='about-me'>
+      <section id='about-me' className="py-5">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-12 col-md-8 col-lg-6 text-center">
+              <h3 className="display-4 mb-4">About Me</h3>
+              <p className="lead">
+                I am a Front-End Developer with 2 years of experience building applications using vanilla JavaScript and React.js. 
+                I have developed user-friendly and visually appealing applications for industries such as beauty salons and restaurants. 
+                While I specialize in front-end development, I have a strong foundation in web technologies, ensuring seamless integration 
+                of responsive designs with back-end systems. 
+              </p>
 
+
+              <div className='row mt-5'>
+                <div className='col-md-6 col-12 col-lg-6'> 
+                    <a href="https://www.linkedin.com/in/anastasiia-skachenko/" target="_blank" rel="noopener noreferrer"  className="btn btn-dark py-2 px-4 w-40 mb-2" >LinkedIn</a>
+                  </div>
+                <div className='col-md-6 col-12 col-lg-6'> 
+                  <a href="https://github.com/AnastasiaSkachenko" target="_blank" rel="noopener noreferrer" className="btn btn-dark py-2 px-4 w-40 mb-2" >GitHub</a>              
+                </div>
+                </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section id='projects'>
-
+      <section id="projects" >
+        <div className="container">
+          <div className="row justify-content-center">
+            <h3 className="display-4 mb-4 text-center">Projects</h3>
+            
+            <div className="project-card mb-4 p-4">
+              <h3>Beauty Salon</h3>
+              <ul>
+                <li>Developed a website with information about all services providing an easy-to-use UI.</li>
+                <li>Tools Used:</li>
+                <div className="d-flex justify-content-start gap-3">
+                  <button className="btn btn-outline-dark mb-2">Python</button>
+                  <button className="btn btn-outline-dark mb-2">CSS</button>
+                  <button className="btn btn-outline-dark mb-2">HTML</button>
+                </div>
+              </ul>
+            </div>
+            
+            <div className="project-card mb-4 p-4">
+              <h3>Restaurant Manager</h3>
+              <ul>
+                <li>Developed and deployed an application to manage workers and their data in restaurants.</li>
+                <li>Tools Used:</li>
+                <div className="d-flex justify-content-start gap-3">
+                  <button className="btn btn-outline-dark mb-2">React</button>
+                  <button className="btn btn-outline-dark mb-2">Django</button>
+                  <button className="btn btn-outline-dark mb-2">Python</button>
+                </div>
+              </ul>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section id='skills'>
 
-      </section>
-      <section id='contact'>
+      <section id="skills" className="py-5">
+      <div className="container">
+        <div className="row justify-content-center">
+          <h3 className="display-4 mb-4 text-center">Skills</h3>
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 justify-content-center">
+            
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/python.png" alt="Python" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">Python</h6>
+                  <p className="card-text text-muted">4 years experience</p>
+                </div>
+              </div>
+            </div>
 
-      </section>
-    </>
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/django.png" alt="Django" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">Django</h6>
+                  <p className="card-text text-muted">3 years experience</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/html5.png" alt="HTML5" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">HTML</h6>
+                  <p className="card-text text-muted">2 years experience</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/js.jpeg" alt="JavaScript" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">JavaScript</h6>
+                  <p className="card-text text-muted">3 years experience</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/CSS3.png" alt="CSS3" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">CSS3</h6>
+                  <p className="card-text text-muted">2 years experience</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/react.png" alt="React" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">React</h6>
+                  <p className="card-text text-muted">1 year experience</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="col">
+              <div className="card text-center shadow border-light rounded-3">
+                <img src="html_finalprojimages/bootstrap.png" alt="Bootstrap" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <div className="card-body">
+                  <h6 className="card-title font-weight-bold">Bootstrap</h6>
+                  <p className="card-text text-muted"> {'<'}1 year experience</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="contact" className=" py-5">
+      <div className="container text-center">
+        <h3 className="display-4 mb-4">Contact Me</h3>
+        <p className="lead mb-4">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
+        <div className="row justify-content-center">
+          <div className="fields">
+            <form action="mailto:skachenkoa@gmail.com" method="post" encType="text/plain">
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label">Your Name</label>
+                <input type="text" className="form-control" id="name" name="name" placeholder="Enter your name" required />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">Your Email</label>
+                <input type="email" className="form-control" id="email" name="email" placeholder="Enter your email" required />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="message" className="form-label">Your Message</label>
+                <textarea className="form-control" id="message" name="message" rows={4} placeholder="Write your message" required></textarea>
+              </div>
+              <div className="mb-3">
+                <button type="submit" className="btn btn-dark btn-lg">Send Message</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer className="bg-dark text-white py-4">
+      <div className="container text-center">
+        <div className="row">
+          <div className="col-md-4">
+            <h5>Contact Me</h5>
+            <ul className="list-unstyled">
+              <li><strong>Email:</strong> <a href="mailto:company123workemail@gmail.com" className="text-white">skachenkkoa@gmail.com</a></li>
+              <li><strong>Phone:</strong> <a href="tel:+123456789" className="text-white">+43 73 359 68 94</a></li>
+            </ul>
+          </div>
+          <div className="col-md-4">
+            <h5>Follow Me</h5>
+            <ul className="list-unstyled">
+              <li><a href="https://www.linkedin.com/in/anastasiia-skachenko/" target="_blank" rel="noopener noreferrer" className="text-white">LinkedIn</a></li>
+              <li><a href="https://github.com/AnastasiaSkachenko" target="_blank" rel="noopener noreferrer" className="text-white">GitHub</a></li>
+            </ul>
+          </div>
+          <div className="col-md-4"> 
+            <a href="#main" className="btn btn-light">Go to Main Section</a>
+          </div>
+        </div>
+      </div>
+      <div className="text-center mt-3">
+        <small>&copy; 2024 Anastasiia Skachenko. All rights reserved.</small>
+      </div>
+    </footer>
+
+  </>
   )
 }
 
