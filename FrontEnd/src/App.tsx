@@ -12,29 +12,30 @@ function App() {
           <a href='#about-me'>About me</a>
           <a href='#contact' >Contact me</a>
         </nav>
-        <div className='container'>
-
-        <Row className="row-my">
-          <Col  className='col-1'  xs={12} md={6} lg={8}>
-            <h3>FrontEnd Developer</h3>
-          </Col>
-          <Col className="col-photo" xs={12} md={6} lg={4}>
-            <div className="circle">
-              <div className="circle-inner">
-                <img src="./me.PNG" alt="Profile" />
+        <div className="container">
+          <Row className="align-items-center mb-5">
+            <Col xs={0} md={1} lg={1} ></Col>
+            <Col xs={12} md={5} lg={7} className="text-center text-md-start">
+              <h3 className="display-5 fw-bold">Front-end Developer</h3>
+            </Col>
+            <Col xs={12} md={6} lg={4} className="d-flex justify-content-center">
+              <div className="circle">
+                <div className="circle-inner">
+                  <img src="./me.PNG" alt="Profile" />
+                </div>
               </div>
-            </div>
-          </Col>
-        </Row>
-        <Row className="row-my">
-          <Col className='col-1'  xs={12} md={6} lg={8}>
-            <Button className='button-my'>Skills</Button>
-            <Button className='button-my'>Projects</Button>
-          </Col>
-          <Col  className='col-1' xs={12} md={6} lg={4}>
-            <h3>I am Anastasiia Skachenko</h3>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+          <Row className="align-items-center mt-5">
+            <Col xs={0} md={2} lg={2} ></Col>
+            <Col xs={12} md={4} lg={6} className="d-flex justify-content-center justify-content-md-start gap-3">
+              <Button variant="outline-dark" size="lg">Skills</Button>
+              <Button variant="outline-dark" size="lg">Projects</Button>
+            </Col>
+            <Col xs={12} md={6} lg={4} className="text-center">
+              <h3 className="text-center">I am Anastasiia Skachenko</h3>
+            </Col>
+          </Row>
         </div>
 
       </section>

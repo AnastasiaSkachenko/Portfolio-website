@@ -28,7 +28,7 @@ nav {
   display: flex;  
   align-items: center;  
   justify-content: center;  
-
+  aspect-ratio: 1 / 1;
 }
 
 .row-my {
@@ -48,7 +48,10 @@ nav {
   align-items: center;  
   justify-content: center;  
   margin-bottom: 1em;
+  aspect-ratio: 1 / 1;
 }
+
+
 .circle img {
   width: 125%; 
 }
@@ -57,6 +60,8 @@ nav {
   display: flex;
   flex-direction: column;
   width: 100%;
+  animation: dropDown 1s ease-out;  
+
 }
 
 .col-1, .col-photo {
@@ -70,23 +75,59 @@ nav {
   place-items: end;
 }
 
-.row-my {
-  padding: 1em;
+@keyframes dropDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px); /* Start slightly above */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0); /* Settle at its final position */
+  }
 }
 
-.button-my {
-  margin: 2em;
-  width: 8em;
-  height: 3em;
-  background-color: white;
-  color: black;
-  border: none;
-  font-size: 1.5em;
+
+ 
+
+@media (max-width: 800px) {
+  .container {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centers the items vertically */
+    align-items: center; /* Centers the items horizontally */
+    gap: 2em;
+  }
+  
+   .circle {
+    width: 15em;  
+    height: 15em;
+    margin-top: 2em;
+    margin-bottom: 0em;
+  }
+
+ 
+
+ 
+
+  .circle img { 
+    object-fit: cover;
+  }
+
+ 
+
+  .text-center {
+    text-align: center;
+    margin: 0.5em;
+  }
+
+  .display-5 {
+    font-size: 2rem;  
+  }
 }
 
-.button-my:hover {
-  background-color: #cfcfcf;
-}
+ 
+
 
 a {
   color: black;
