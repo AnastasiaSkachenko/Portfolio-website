@@ -28,7 +28,7 @@ function App() {
 
   const getProjects = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/get-project/');
+      const response = await axios.get('http://127.0.0.1:8000/api/get-project/');
        const fetchedProjects = response.data.projects.map((project: ProjectFetched) => ({
         ...project,
         tools: project.tools.split(','), 
@@ -49,7 +49,7 @@ function App() {
     event.preventDefault()
     setSuccess('sending...')
     try {
-      await axios.post('http://127.0.0.1:8000/send-confirmation/', 
+      await axios.post('http://127.0.0.1:8000/api/send-confirmation/', 
         {
           name,
           email,
@@ -104,7 +104,7 @@ function App() {
             <Col xs={12} md={5} lg={5} className="d-flex justify-content-center pl-md-2 ">
               <div className="circle">
                 <div className="circle-inner">
-                  <img src="./me.PNG" alt="Profile" />
+                  <img src="/static/images/me.PNG" alt="Profile" />
                 </div>
               </div>
             </Col>
@@ -183,7 +183,7 @@ function App() {
             
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/python.png" alt="Python" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/python.png" alt="Python" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">Python</h6>
                   <p className="card-text text-muted">4 years experience</p>
@@ -193,7 +193,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/django.png" alt="Django" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/django.png" alt="Django" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">Django</h6>
                   <p className="card-text text-muted">3 years experience</p>
@@ -203,7 +203,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/html5.png" alt="HTML5" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/html5.png" alt="HTML5" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">HTML</h6>
                   <p className="card-text text-muted">2 years experience</p>
@@ -213,7 +213,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/js.jpeg" alt="JavaScript" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/js.jpeg" alt="JavaScript" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">JavaScript</h6>
                   <p className="card-text text-muted">3 years experience</p>
@@ -223,7 +223,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/CSS3.png" alt="CSS3" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/CSS3.png" alt="CSS3" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">CSS3</h6>
                   <p className="card-text text-muted">2 years experience</p>
@@ -233,7 +233,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/react.png" alt="React" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/react.png" alt="React" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">React</h6>
                   <p className="card-text text-muted">1 year experience</p>
@@ -243,7 +243,7 @@ function App() {
 
             <div className="col">
               <div className="card text-center shadow border-light rounded-3">
-                <img src="html_finalprojimages/bootstrap.png" alt="Bootstrap" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
+                <img src="/static/images/bootstrap.png" alt="Bootstrap" className="card-img-top" style={{ height: '35px', objectFit: 'contain' }} />
                 <div className="card-body">
                   <h6 className="card-title font-weight-bold">Bootstrap</h6>
                   <p className="card-text text-muted"> {'<'}1 year experience</p>
