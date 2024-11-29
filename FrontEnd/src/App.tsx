@@ -1,11 +1,70 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Row, Col} from 'react-bootstrap' 
 import './App.css'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
  
+
+interface Project {
+  name: string,
+  description: string,
+  tools: string[]
+}
+
+interface ProjectFetched {
+  name: string,
+  description: string,
+  tools: string
+
+}
 
 
 function App() {
+  const [projects, setProjects] = useState<Project[]>()
+  const [name, setName] = useState<string>('')
+  const [body, setBody] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const getProjects = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/get-project/');
+       const fetchedProjects = response.data.projects.map((project: ProjectFetched) => ({
+        ...project,
+        tools: project.tools.split(','), 
+      }));
+       setProjects(fetchedProjects);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
+  
+  useEffect(() => {
+    if (!projects?.[1]) {
+      getProjects()
+    }
+  }, [projects])
+
+  const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setSuccess('sending...')
+    try {
+      await axios.post('http://127.0.0.1:8000/send-confirmation/', 
+        {
+          name,
+          email,
+          body
+        }
+      );
+      setSuccess('I got your message!')
+      setName('')
+      setBody('')
+      setEmail('')
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }  
+
+  }
 
   useEffect(() => {
     const sections = document.querySelectorAll('.container');
@@ -93,32 +152,24 @@ function App() {
         <div className="container">
           <div className="row justify-content-center">
             <h3 className="display-4 mb-4 text-center">Projects</h3>
+
+            {projects?.map((project) => (
+              <div key={project.name} className="project-card mb-4 p-4">
+                <h3>{project.name}</h3>
+                <ul>
+                  <li>{project.description}</li>
+                  <li>Tools Used:</li>
+                  <div className="d-flex justify-content-start gap-3">
+                    {project.tools.map((tool) => (
+                      <button key={tool} className="btn btn-outline-dark mb-2">{tool}</button>
+                    ))}
+                  </div>
+                </ul>
+              </div>
             
-            <div className="project-card mb-4 p-4">
-              <h3>Beauty Salon</h3>
-              <ul>
-                <li>Developed a website with information about all services providing an easy-to-use UI.</li>
-                <li>Tools Used:</li>
-                <div className="d-flex justify-content-start gap-3">
-                  <button className="btn btn-outline-dark mb-2">Python</button>
-                  <button className="btn btn-outline-dark mb-2">CSS</button>
-                  <button className="btn btn-outline-dark mb-2">HTML</button>
-                </div>
-              </ul>
-            </div>
+            ))}
             
-            <div className="project-card mb-4 p-4">
-              <h3>Restaurant Manager</h3>
-              <ul>
-                <li>Developed and deployed an application to manage workers and their data in restaurants.</li>
-                <li>Tools Used:</li>
-                <div className="d-flex justify-content-start gap-3">
-                  <button className="btn btn-outline-dark mb-2">React</button>
-                  <button className="btn btn-outline-dark mb-2">Django</button>
-                  <button className="btn btn-outline-dark mb-2">Python</button>
-                </div>
-              </ul>
-            </div>
+ 
           </div>
         </div>
       </section>
@@ -212,22 +263,23 @@ function App() {
         <p className="lead mb-4">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
         <div className="row justify-content-center">
           <div className="fields">
-            <form action="mailto:skachenkoa@gmail.com" method="post" encType="text/plain">
+            <form  onSubmit={sendEmail}>
               <div className="mb-3">
                 <label htmlFor="name" className="form-label">Your Name</label>
-                <input type="text" className="form-control" id="name" name="name" placeholder="Enter your name" required />
+                <input type="text" className="form-control" id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" required />
               </div>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">Your Email</label>
-                <input type="email" className="form-control" id="email" name="email" placeholder="Enter your email" required />
+                <input type="email" className="form-control" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
               </div>
               <div className="mb-3">
                 <label htmlFor="message" className="form-label">Your Message</label>
-                <textarea className="form-control" id="message" name="message" rows={4} placeholder="Write your message" required></textarea>
+                <textarea className="form-control" id="message" name="message" value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder="Write your message" required></textarea>
               </div>
               <div className="mb-3">
                 <button type="submit" className="btn btn-dark btn-lg">Send Message</button>
               </div>
+              {success && <p className='success'>{success}</p>}
             </form>
           </div>
         </div>
