@@ -1,2 +1,10 @@
 .env
 DS_Store
+
+ 
+venv/
+
+ 
+*.log
+*.pyc
+*.pyo

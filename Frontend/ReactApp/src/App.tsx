@@ -38,8 +38,9 @@ function App() {
 
 
   const getProjects = async () => {
+    const b = 'http://127.0.0.1:8000/'
     try {
-      const baseUrl = window.location.origin;
+      const baseUrl = b ?? window.location.origin;
 
       const cookies = new Cookies()
 
@@ -98,7 +99,7 @@ function App() {
           entry.target.classList.add('visible');  
         }  
       });
-    }, { threshold: 0.5 }); 
+    }, { threshold: 0.1 }); 
 
     sections.forEach((section) => {
       observer.observe(section);
@@ -171,31 +172,31 @@ function App() {
         </div>
       </section>
 
-      <section id="projects" >
+      <section id="projects">
         <div className="container">
           <div className="row justify-content-center">
             <h3 className="display-4 mb-4 text-center">Projects</h3>
-
             {projects?.map((project) => (
-              <div key={project.name} className="project-card mb-4 p-4">
-                <h3>{project.name}</h3>
-                <ul>
-                  <li>{project.description}</li>
-                  <li>Tools Used:</li>
-                  <div className="d-flex justify-content-start gap-3">
+              <div key={project.name} className="col-12 col-sm-12 col-lg-12 mb-4">
+                <div className="project-card p-4">
+                  <h3>{project.name}</h3>
+                  <p>{project.description}</p>
+                  <h5>Tools Used:</h5>
+                  <div className="d-flex flex-wrap gap-2">
                     {project.tools.map((tool) => (
-                      <button key={tool} className="btn btn-outline-dark mb-2">{tool}</button>
+                      <button key={tool} className="btn btn-outline-dark mb-2">
+                        {tool}
+                      </button>
                     ))}
                   </div>
-                </ul>
+                </div>
               </div>
-            
             ))}
-            
- 
           </div>
         </div>
       </section>
+
+
 
 
       <section id="skills" className="py-5">

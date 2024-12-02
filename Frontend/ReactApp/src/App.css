@@ -164,3 +164,26 @@ li {
  
 }
  
+@media (max-width: 576px) {
+  #projects {
+    padding: 0.5em;
+  }
+
+  .project-card { 
+    margin: 0px;
+  }
+
+  .container {
+    margin: 0px;
+  }
+
+  .project-card h3 {
+    font-size: 1.25rem;
+    margin-left: 0rem;
+  }
+
+  .btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
