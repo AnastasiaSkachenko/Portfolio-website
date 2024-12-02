@@ -3,7 +3,8 @@ import { Row, Col} from 'react-bootstrap'
 import './App.css'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
- 
+import Cookies from "universal-cookie"; 
+
 
 interface Project {
   name: string,
@@ -26,9 +27,30 @@ function App() {
   const [email, setEmail] = useState<string>('')
   const [success, setSuccess] = useState<string | null>(null)
 
+
+  const cookies = new Cookies()
+
+  const axiosInstance = axios.create({
+    headers: {
+        'X-CSRFToken': cookies.get("csrftoken")
+    }
+  });
+
+
   const getProjects = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/get-project/');
+      const baseUrl = window.location.origin;
+
+      const cookies = new Cookies()
+
+      const axiosInstance = axios.create({
+        headers: {
+            'X-CSRFToken': cookies.get("csrftoken")
+        }
+      });
+    
+
+      const response = await axiosInstance.get(`${baseUrl}/api/get-project/`);
        const fetchedProjects = response.data.projects.map((project: ProjectFetched) => ({
         ...project,
         tools: project.tools.split(','), 
@@ -47,9 +69,10 @@ function App() {
 
   const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const baseUrl = window.location.origin;
     setSuccess('sending...')
     try {
-      await axios.post('http://127.0.0.1:8000/api/send-confirmation/', 
+      await axiosInstance.post(`${baseUrl}/api/send-confirmation/`, 
         {
           name,
           email,
