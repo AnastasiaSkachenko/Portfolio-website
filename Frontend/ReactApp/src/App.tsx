@@ -37,10 +37,9 @@ function App() {
   });
 
 
-  const getProjects = async () => {
-    const b = 'http://127.0.0.1:8000/'
+  const getProjects = async () => { 
     try {
-      const baseUrl = b ?? window.location.origin;
+      const baseUrl = window.location.origin;
 
       const cookies = new Cookies()
 
