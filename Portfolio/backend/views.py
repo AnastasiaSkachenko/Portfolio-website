@@ -2,15 +2,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.http import JsonResponse
 from django.core.mail import send_mail
-from .models import Project
+from .models import Project, Skill
 from rest_framework.decorators import api_view
-from rest_framework import serializers
-
-class ProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-        fields = ['name', 'description', 'tools'] 
-
+from .serializers import ProjectSerializer, SkillSerializer
 
 @api_view(['POST'])
 def send_confirmation(request): 
@@ -57,3 +51,12 @@ def get_project(request):
         serializer = ProjectSerializer(projects, many=True)
 
         return JsonResponse({'projects': serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_skill(request):
+        skills = Skill.objects.all()
+
+        serializer = SkillSerializer(skills, many=True)
+
+        return JsonResponse({'skills': serializer.data}, status=status.HTTP_200_OK)
