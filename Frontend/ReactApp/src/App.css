@@ -12,6 +12,7 @@
 section {
   padding: 2em;
   width: 100%;
+  height: 100vh;
 
 }
 #main, #projects, #contact {
@@ -148,16 +149,10 @@ li {
   margin: 1em;
 }
 
-card {
-  background-color: #D4BEE4;
-}
+ 
 
 
-.project-card {
-  margin: 0 15px 15px 30px;
-  padding-bottom: 5px;
-}
-
+ 
 .disabled-black:disabled {
   color:black;
   opacity: 1;
@@ -282,6 +277,31 @@ card {
 
  
  
+.carousel-inner {
+  padding: 8em; 
+}
+
+.project-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #EEEEEE;
+  margin: 1em 2em;
+  transition: all 0.3s ease;
+
+}
+
+.project-card:hover {
+  transform: scale(1.1);
+  background-color: #9B7EBD;
+  color: white;
+  border-radius: 1em;
+}
+
+.project-card:hover button{
+  color:white;
+  border-color: white;
+}
+
  
 
 @media (max-width: 1050px) {
@@ -307,15 +327,23 @@ card {
 
 /* Small Screens: 576px and below */
 @media (max-width: 600px) {
+ 
+
   .media-scroller {
-    max-width: 27%; 
-    grid-auto-columns: 65%; /* Almost full width */
+    width: 100%; 
+    grid-auto-columns: 65%; 
+    padding: 0.5em 4em 4em;  
+
   }
 
   .media-element {
     padding: 0.8rem; /* Smaller padding for small screens */
   }
-
+ 
+  .carousel-inner {
+    padding: 0px;
+    margin: 0px;
+  }
  
 
   .card-title {
@@ -329,9 +357,20 @@ card {
 
 @media (max-width: 450px) {
   .media-scroller {
+    max-width: 30%; 
+    grid-auto-columns: 85%; /* Almost full width */
+    padding: 0.2em 1em 1em; /* Smaller padding */
+    height: 13em; /* Reduce height further */
+  }
+}
+@media (max-width: 350px) {
+  .media-scroller {
     max-width: 20%; 
     grid-auto-columns: 85%; /* Almost full width */
     padding: 0.2em 1em 1em; /* Smaller padding */
     height: 13em; /* Reduce height further */
   }
 }
+
+ 
+

@@ -4,6 +4,7 @@ import './App.css'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from "universal-cookie"; 
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // 3B1E54 9B7EBD D4BEE4 EEEEEE
 
@@ -131,12 +132,12 @@ function App() {
   
   return (
     <>
-      <section id="main"    >
+      <section id="main"   >
         <nav>
           <a className='nav-link' href='#about-me'>About me</a>
           <a className='nav-link' href='#contact' >Contact me</a>
         </nav>
-        <div className="container p-0  m-0 p-lg-5   ">
+        <div className="container p-0  m-0 p-lg-5  ">
           <Row className="align-items-center  text-sm-center">
              <Col xs={12} md={12} lg={7} className='text-center pl-5' >
                 <Row >
@@ -168,9 +169,9 @@ function App() {
 
       </section>
 
-      <section id='about-me' className="py-5">
-        <div className="container">
-          <div className="row justify-content-center">
+      <section id='about-me' className="py-5 d-flex  align-items-center">
+        <div className="container ">
+          <div  >
             <div className="col-12 col-md-8 col-lg-6 text-center">
               <h1 className=" mb-4">About Me</h1>
               <p className="lead">
@@ -194,32 +195,70 @@ function App() {
         </div>
       </section>
 
-      <section id="projects">
+      <section id="projects" className='d-flex  align-items-center'>
         <div className="container">
-          <div className="row justify-content-center">
+          <div >
             <h1 className=" mb-4 text-center">Projects</h1>
-            {projects?.map((project) => (
-              <div key={project.name} className="col-12 col-sm-12 col-lg-12 mb-2">
-                <div className="project-card p-4">
-                  <h3 >{project.name}</h3>
-                  <p>{project.description}</p>
-                  <p className='fw-bold'>Tools Used:</p>
-                  <div className="d-flex flex-wrap gap-2">
-                    {project.tools.map((tool) => (
-                      <button key={tool} className="btn btn-outline-dark  disabled-black mb-2"  disabled>
-                        {tool}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <div id="carouselProjects" className="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
+              <div className="carousel-indicators">
+                {projects?.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    data-bs-target="#carouselProjects"
+                    data-bs-slide-to={index}
+                    className={index === 0 ? "active" : ""}
+                    aria-current={index === 0 ? "true" : undefined}
+                    aria-label={`Slide ${index + 1}`}
+                  ></button>
+                ))}
               </div>
-            ))}
+
+              <div className="carousel-inner">
+                {projects?.map((project, index) => (
+                  <div key={project.name} className={`carousel-item ${index === 0 ? "active" : ""}`}>
+                    <div className="project-card p-4">
+                      <h3>{project.name}</h3>
+                      <p>{project.description}</p>
+                      <p className="fw-bold">Tools Used:</p>
+                      <div className="d-flex flex-wrap gap-2">
+                        {project.tools.map((tool) => (
+                          <button key={tool} className="btn btn-outline-dark disabled-black mb-2" disabled>
+                            {tool}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="carousel-control-prev   d-none d-sm-block"
+                type="button"
+                data-bs-target="#carouselProjects"
+                data-bs-slide="prev"
+              >
+                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span className="visually-hidden">Previous</span>
+              </button>
+
+              <button
+                className="carousel-control-next"
+                type="button"
+                data-bs-target="#carouselProjects"
+                data-bs-slide="next"
+              >
+                <span className="carousel-control-next-icon d-none d-sm-block" aria-hidden="true"></span>
+                <span className="visually-hidden">Next</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
 
-      <section id="skills" className="py-5">
+      <section id="skills" className="py-5 d-flex  align-items-center">
       <div className="container">
         <div className="row justify-content-center">
           <h1 className="  mb-4 text-center">Skills</h1>
@@ -243,10 +282,10 @@ function App() {
     </section>
 
 
-    <section id="contact" className=" py-5">
+    <section id="contact" className=" py-5 d-flex  align-items-center">
       <div className="container text-center">
-        <h1 className="  mb-4">Contact Me</h1>
-        <p className="lead mb-4">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
+        <h1 className='mb-0' >Contact Me</h1>
+        <p className="lead mb-0 ">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
         <div className="row justify-content-center">
           <div className="fields">
             <form  onSubmit={sendEmail}>
@@ -272,31 +311,30 @@ function App() {
       </div>
     </section>
 
-    <footer className="text-violet pt-5 pb-3">
+    <footer className="text-violet py-3 py-sm-4 py-md-5 ">
       <div className="container text-center">
-        <div className="row">
-          <div className="col-6">
-            <h5 className='fw-bold'>Contact Me</h5>
-            <ul className="list-unstyled">
-              <li><strong className="text-violet">Email:</strong> <a href="mailto:skachenkoa@gmail.com" className="text-violet">skachenkkoa@gmail.com</a></li>
-              <li><strong className="text-violet">Phone:</strong> <a href="tel:+123456789" className="text-violet">+43 73 359 68 94</a></li>
-            </ul>
-          </div>
-          <div className="col-6">
-            <h5 className='fw-bold'>Follow Me</h5>
-            <ul className="list-unstyled d-flex align-items-center justify-content-center mt-3">
-              <li><a href="http://linkedin.com/in/anastasiia-skachenko" target="_blank" rel="noopener noreferrer" className="text-violet">
-                <img src={imageRoot + 'linkedIn.png'}/>
-              </a></li>
-              <li><a href="https://github.com/AnastasiaSkachenko" target="_blank" rel="noopener noreferrer" className="text-white">
-                <img src={imageRoot + 'github.png'}/>
-              </a></li>
-            </ul>
-          </div>
- 
+      <div className="row">
+        <div className="col-12 col-sm-6">
+          <h5 className='fw-bold'>Contact Me</h5>
+          <ul className="list-unstyled">
+            <li><strong className="text-violet">Email:</strong> <a href="mailto:skachenkoa@gmail.com" className="text-violet">skachenkkoa@gmail.com</a></li>
+            <li><strong className="text-violet">Phone:</strong> <a href="tel:+123456789" className="text-violet">+43 73 359 68 94</a></li>
+          </ul>
+        </div>
+        <div className="col-12 col-sm-6  ">
+          <h5 className='fw-bold d-none d-sm-block'>Follow Me</h5>
+          <ul className="list-unstyled d-flex align-items-center justify-content-center mt-0 mt-sm-3">
+            <li><a href="http://linkedin.com/in/anastasiia-skachenko" target="_blank" rel="noopener noreferrer" className="text-violet">
+              <img src={imageRoot + 'linkedIn.png'} alt="LinkedIn"/>
+            </a></li>
+            <li><a href="https://github.com/AnastasiaSkachenko" target="_blank" rel="noopener noreferrer" className="text-white">
+              <img src={imageRoot + 'github.png'} alt="GitHub"/>
+            </a></li>
+          </ul>
         </div>
       </div>
-      <div className="text-center  ">
+      </div>
+      <div className="text-center">
         <small>&copy; 2024 Anastasiia Skachenko. All rights reserved.</small>
       </div>
     </footer>
