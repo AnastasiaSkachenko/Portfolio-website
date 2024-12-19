@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Row, Col} from 'react-bootstrap' 
+import { Row, Col,} from 'react-bootstrap' 
 import './App.css'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -115,6 +115,12 @@ function App() {
     };
   }, []);
 
+  const chunkSize = 4;
+  const chunkedSkills = [];
+  for (let i = 0; i < (skills? skills.length : 0); i += chunkSize) {
+    chunkedSkills.push(skills?.slice(i, i + chunkSize));
+  }
+
   
  
   
@@ -147,11 +153,30 @@ function App() {
             </Col>
           </Row>
           <Row className="align-items-center justify-content-center  mt-3">
+            <Col xs={12} md={12} lg={6} className="  skills-container">
+              <h4 className='mb-4'>Skills</h4>
+              <div className="row d-grid">
+                <div className='slider'>
+                  <div className='slide-track' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
+                  {skills?.map(skill => (
+                    <div key={skill.name} className='slide'>
+                      <img src={imageRoot + skill.image} className='skill-image'/>
+                    </div>
+                  ))}
+                  {skills?.map(skill => (
+                    <div key={skill.name} className='slide'>
+                      <img src={imageRoot + skill.image} className='skill-image'/>
+                    </div>
+                  ))}
+                  </div>
+                </div>
+              </div>
+              <a href='#skills' className='text-white text-decoration-none  '>See more</a>
 
-
-            <Col  className="d-flex justify-content-center   gap-3">
-              <a href="#skills" className="btn btn-4 btn-dark px-4 py-2">Skills</a>
-              <a href="#projects" className="btn btn-4 btn-dark px-4 py-2">Projects</a>
+            </Col>
+            <Col>
+            <a href="#projects" className="btn btn-4 btn-dark px-4 py-2">Projects</a>
+ 
             </Col>
           </Row>
         </div>

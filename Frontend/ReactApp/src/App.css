@@ -11,10 +11,9 @@
 
 
 section {
-  padding: 2em; 
+  padding: 2em 9em; 
   width: 100%;
-  height: 100vh;
-
+  min-height: 100vh;
 }
 #main, #projects, #contact {
   background-color: #D4BEE4;
@@ -51,8 +50,15 @@ a img {
 }
 
  
+.skills-container {
+  padding: 3em;
+  background-color: #9B7EBD;
+  border-radius: 1em;
+}
  
-
+.imageCarousel {
+  width: 45em;
+}
  
 
 .sidebar {
@@ -199,6 +205,11 @@ li {
   margin: 1em;
 }
 
+ .skill-image {
+
+  height: 4em;
+   }
+
  
 
 #carouselProjects{
@@ -302,14 +313,89 @@ li {
   border-radius: 10px;
 }
 
+
+
+.media-scroller-skills {
+  grid-auto-flow: column;
+  grid-auto-columns: 25%;
+  height: 7em;
+  padding: 0.2em 2em 2em;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  animation: scroll-skills 10s linear infinite;
+  overflow-x: hidden; /* Hide scrollbar */
+  overscroll-behavior-inline: contain;
+  position: relative;
+}
+.media-scroller-skills div{
+background-color: #EEEEEE;
+}
  
+@keyframes scroll-skills {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
  
+
+
+.slider {
+  height: 5em;
+  position: relative;
+  margin: auto;
+  width: 90%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.slide-track {
+  display: flex;
+  animation: scroll 10s linear infinite;
+}
+
+.slide-track:hover {
+  animation-play-state: paused;
+}
+
+.slide {
+  height: 5em;
+  display: flex;
+  align-items: center;
+  padding: 1em;
+  perspective: 10em;
+}
+
+
+.slide img {
+  width: 100%;
+  transition: transform 1s;
+}
+
+.slide img:hover {
+  transform: translateZ(30px);
+}
+ 
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-15em*3));
+  }
+}
+
+
+
 
 .media-element {
   grid-template-rows: min-content;
   border: 0.1em solid #D4BEE4;
   box-shadow: #D4BEE4;
- }
+}
 
 .media-element > img {
   inline-size: 100%;
