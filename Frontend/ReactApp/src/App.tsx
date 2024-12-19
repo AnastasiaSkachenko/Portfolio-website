@@ -5,28 +5,14 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from "universal-cookie"; 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { Project, ProjectFetched, Skill } from './interfaces';
+import Sidebar from './sidebar';
 
 // 3B1E54 9B7EBD D4BEE4 EEEEEE
 
-interface Project {
-  name: string,
-  description: string,
-  tools: string[]
-}
+ 
 
-interface Skill {
-  name: string,
-  image: string,
-  experience: number
-}
-
-interface ProjectFetched {
-  name: string,
-  description: string,
-  tools: string
-
-}
-
+ 
 
 function App() {
   const [projects, setProjects] = useState<Project[]>()
@@ -128,39 +114,42 @@ function App() {
       });
     };
   }, []);
+
+  
  
   
   return (
     <>
+      <Sidebar/>
       <section id="main"   >
-        <nav>
-          <a className='nav-link' href='#about-me'>About me</a>
-          <a className='nav-link' href='#contact' >Contact me</a>
-        </nav>
         <div className="container p-0  m-0 p-lg-5  ">
           <Row className="align-items-center  text-sm-center">
              <Col xs={12} md={12} lg={7} className='text-center pl-5' >
                 <Row >
                   <h1  className=" m-0   p-0   fw-bold">Anastasiia Skachenko</h1>
                 </Row>
-                <Row >
+                <Row > 
                   <h3 className=" p-0   ">Front-end Developer</h3>
+                </Row>
+                <Row className='justify-content-center'>
+                <img src={`${imageRoot}/cat-typing.gif`} style={{width: "5em"}}/>
                 </Row>
 
              </Col>
             <Col xs={12} md={12} lg={5} className="d-flex justify-content-center  pl-5 pl-md-2 ">
                <Row className='justify-content-center'>
-                <div className="circle">
-                  <div className="circle-inner">
-                    <img src={`${imageRoot}/me.PNG`} alt="Profile" />
-                  </div>
+                <div  className='photo d-flex align-content-center justify-content-center'> 
+                    <img src={`${imageRoot}/me13.PNG`} alt="Profile" />
+                 
                 </div>
               </Row>
 
             </Col>
           </Row>
           <Row className="align-items-center justify-content-center  mt-3">
-             <Col   className="d-flex justify-content-center   gap-3">
+
+
+            <Col  className="d-flex justify-content-center   gap-3">
               <a href="#skills" className="btn btn-4 btn-dark px-4 py-2">Skills</a>
               <a href="#projects" className="btn btn-4 btn-dark px-4 py-2">Projects</a>
             </Col>
@@ -169,89 +158,101 @@ function App() {
 
       </section>
 
-      <section id='about-me' className="py-5 d-flex  align-items-center">
-        <div className="container ">
-          <div  >
+      <section id="about-me" className="d-flex align-items-center justify-content-center">
+        <div className="container">
+          <div className="row justify-content-center">
             <div className="col-12 col-md-8 col-lg-6 text-center">
-              <h1 className=" mb-4">About Me</h1>
+              <h1 className="mb-4">About Me</h1>
               <p className="lead">
-                I am a Front-End Developer with 2 years of experience building applications using vanilla JavaScript and React.js. 
-                I have developed user-friendly and visually appealing applications for industries such as beauty salons and restaurants. 
-                While I specialize in front-end development, I have a strong foundation in web technologies, ensuring seamless integration 
-                of responsive designs with back-end systems. 
+                I am a Front-End Developer with 2 years of experience building
+                applications using vanilla JavaScript and React.js. I have developed
+                user-friendly and visually appealing applications for industries such
+                as beauty salons and restaurants. While I specialize in front-end
+                development, I have a strong foundation in web technologies,
+                ensuring seamless integration of responsive designs with back-end
+                systems.
               </p>
 
-
-              <div className='d-flex flex-row gap-5 justify-content-center mt-5'>
-                <a href="http://linkedin.com/in/anastasiia-skachenko" target="_blank" rel="noopener noreferrer" className="text-violet">
-                  <img src={imageRoot + 'linkedIn.png'}/>
+              <div className="d-flex flex-row gap-5 justify-content-center mt-5">
+                <a
+                  href="http://linkedin.com/in/anastasiia-skachenko"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={imageRoot + "linkedIn.png"} />
                 </a>
-                <a href="https://github.com/AnastasiaSkachenko" target="_blank" rel="noopener noreferrer" className="text-white">
-                  <img src={imageRoot + 'github.png'}/>
-                </a>              
+                <a
+                  href="https://github.com/AnastasiaSkachenko"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={imageRoot + "github.png"} />
+                </a>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="projects" className='d-flex  align-items-center'>
+      <section id="projects" className='d-flex  align-items-center  '>
         <div className="container">
           <div >
             <h1 className=" mb-4 text-center">Projects</h1>
-            <div id="carouselProjects" className="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
-              <div className="carousel-indicators">
-                {projects?.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    data-bs-target="#carouselProjects"
-                    data-bs-slide-to={index}
-                    className={index === 0 ? "active" : ""}
-                    aria-current={index === 0 ? "true" : undefined}
-                    aria-label={`Slide ${index + 1}`}
-                  ></button>
-                ))}
-              </div>
+            <div className='d-flex justify-content-center'>
+              <div id="carouselProjects" className="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
+                <div className="carousel-indicators">
+                  {projects?.map((_, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      data-bs-target="#carouselProjects"
+                      data-bs-slide-to={index}
+                      className={index === 0 ? "active" : ""}
+                      aria-current={index === 0 ? "true" : undefined}
+                      aria-label={`Slide ${index + 1}`}
+                    ></button>
+                  ))}
+                </div>
 
-              <div className="carousel-inner">
-                {projects?.map((project, index) => (
-                  <div key={project.name} className={`carousel-item ${index === 0 ? "active" : ""}`}>
-                    <div className="project-card p-4">
-                      <h3>{project.name}</h3>
-                      <p>{project.description}</p>
-                      <p className="fw-bold">Tools Used:</p>
-                      <div className="d-flex flex-wrap gap-2">
-                        {project.tools.map((tool) => (
-                          <button key={tool} className="btn btn-outline-dark disabled-black mb-2" disabled>
-                            {tool}
-                          </button>
-                        ))}
+                <div className="carousel-inner">
+                  {projects?.map((project, index) => (
+                    <div key={project.name} className={`carousel-item ${index === 0 ? "active" : ""}`}>
+                      <div className="project-card p-4">
+                        <h3>{project.name}</h3>
+                        <p>{project.description}</p>
+                        <p className="fw-bold">Tools Used:</p>
+                        <div className="d-flex flex-wrap gap-2">
+                          {project.tools.map((tool) => (
+                            <button key={tool} className="btn btn-outline-dark disabled-black mb-2" disabled>
+                              {tool}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                <button
+                  className="carousel-control-prev   d-none d-sm-block"
+                  type="button"
+                  data-bs-target="#carouselProjects"
+                  data-bs-slide="prev"
+                >
+                  <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span className="visually-hidden">Previous</span>
+                </button>
+
+                <button
+                  className="carousel-control-next"
+                  type="button"
+                  data-bs-target="#carouselProjects"
+                  data-bs-slide="next"
+                >
+                  <span className="carousel-control-next-icon d-none d-sm-block" aria-hidden="true"></span>
+                  <span className="visually-hidden">Next</span>
+                </button>
               </div>
-
-              <button
-                className="carousel-control-prev   d-none d-sm-block"
-                type="button"
-                data-bs-target="#carouselProjects"
-                data-bs-slide="prev"
-              >
-                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span className="visually-hidden">Previous</span>
-              </button>
-
-              <button
-                className="carousel-control-next"
-                type="button"
-                data-bs-target="#carouselProjects"
-                data-bs-slide="next"
-              >
-                <span className="carousel-control-next-icon d-none d-sm-block" aria-hidden="true"></span>
-                <span className="visually-hidden">Next</span>
-              </button>
             </div>
           </div>
         </div>
