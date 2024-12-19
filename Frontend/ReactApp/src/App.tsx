@@ -21,6 +21,7 @@ function App() {
   const [body, setBody] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [success, setSuccess] = useState<string | null>(null)
+  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
 
 
   const production = false
@@ -152,32 +153,72 @@ function App() {
 
             </Col>
           </Row>
-          <Row className="align-items-center justify-content-center  mt-3">
-            <Col xs={12} md={12} lg={6} className="  skills-container">
-              <h4 className='mb-4'>Skills</h4>
-              <div className="row d-grid">
-                <div className='slider'>
-                  <div className='slide-track' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
-                  {skills?.map(skill => (
-                    <div key={skill.name} className='slide'>
-                      <img src={imageRoot + skill.image} className='skill-image'/>
+          <Row className="align-items-center justify-content-center  mt-3 p-2">
+          <Col xs={12} md={12} lg={6} className='p-2'  >
+              <div className="skills-container">
+                <h4 className='text-white' >Projects</h4>
+                  <div className=' row d-grid'>
+                    <div className='slider-projects'>
+                      <div className='slide-track-projects' style={{width: (projects?.length ?? 0) * 2 * 10 + 'em'}}>
+                      {projects?.map((project, index) => (
+                        <div key={project.name} 
+                          className={(index % 2 == 0)? 'slide-project second' :'slide-project' }
+                          onMouseEnter={() => setHoveredProject(index)}
+                          onMouseLeave={() => setHoveredProject(null)}>
+                            <a href='#projects'> {hoveredProject === index ? "View More" : project.name}</a>
+                           
+                        </div>
+                      ))}
+                      
+                      <div  
+                          className={'slide-project second' }
+                          onMouseEnter={() => setHoveredProject(3)}
+                          onMouseLeave={() => setHoveredProject(null)}>
+                            <p>{hoveredProject === 3 ? "View More" : "non oblect2"}</p>
+                           
+                        </div>
+
+                        <div  
+                          className={'slide-project' }
+                          onMouseEnter={() => setHoveredProject(4)}
+                          onMouseLeave={() => setHoveredProject(null)}>
+                            <p>{hoveredProject === 4 ? "View More" : "non oblect"}</p>
+                           
+                        </div>
+
+
+
+                      </div>
+
                     </div>
-                  ))}
-                  {skills?.map(skill => (
-                    <div key={skill.name} className='slide'>
-                      <img src={imageRoot + skill.image} className='skill-image'/>
+                  </div>
+              </div>
+            </Col>
+            <Col xs={12} md={12} lg={6} >
+              <div className="skills-container">
+
+                <h4 className='mb-4 text-white'>Skills</h4>
+                <div className="row d-grid">
+                  <div className='slider'>
+                    <div className='slide-track' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
+                    {skills?.map(skill => (
+                      <div key={skill.name} className='slide-skill'>
+                        <img src={imageRoot + skill.image} className='skill-image'/>
+                      </div>
+                    ))}
+                    {skills?.map(skill => (
+                      <div key={skill.name} className='slide-skill'>
+                        <img src={imageRoot + skill.image} className='skill-image'/>
+                      </div>
+                    ))}
                     </div>
-                  ))}
                   </div>
                 </div>
+                <a href='#skills' className='text-white text-decoration-none  '>See more</a>
               </div>
-              <a href='#skills' className='text-white text-decoration-none  '>See more</a>
 
             </Col>
-            <Col>
-            <a href="#projects" className="btn btn-4 btn-dark px-4 py-2">Projects</a>
  
-            </Col>
           </Row>
         </div>
 
@@ -219,13 +260,13 @@ function App() {
         </div>
       </section>
 
-      <section id="projects" className='d-flex  align-items-center  '>
+      <section id="projects" className='d-flex  align-items-center'>
         <div className="container">
           <div >
             <h1 className=" mb-4 text-center">Projects</h1>
             <div className='d-flex justify-content-center'>
               <div id="carouselProjects" className="carousel slide" data-bs-ride="carousel" data-bs-touch="true">
-                <div className="carousel-indicators">
+                <div className="carousel-indicators ">
                   {projects?.map((_, index) => (
                     <button
                       key={index}
