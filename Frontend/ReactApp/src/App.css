@@ -6,19 +6,34 @@
   font-family: Roboto;
   width: 100%;
   background-color: #EEEEEE;
-  overflow-x: hidden;
+  overflow: hidden;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevents default scrolling on the html/body */
+}
+
+.sections-wrapper {
+  height: 100vh; /* Makes the container fill the viewport */
+  width: 100%;
+  overflow-y: scroll; /* Enables vertical scrolling */
+  scroll-snap-type: y mandatory; /* Enables vertical scroll snapping */
 }
 
 section {
+  scroll-snap-align: start;
   padding: 2em 9em; 
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
 }
+
 #main, #projects, #contact {
   background-color: #D4BEE4;
 }
 
-footer {
+footer { 
   background-color: #EEEEEE;
 }
 
@@ -28,6 +43,11 @@ footer {
 
 a img {
   width: 30px;
+}
+
+#contact {
+  padding: 0px;
+
 }
 
  
@@ -65,7 +85,7 @@ a img {
 
 /* sidebar navigation                                                                                               SIDEBAR */
 .sidebar {
-  width: 4em;
+  width: 3.5em;
   height: 100vh;
   position: fixed;
   z-index: 1000;
@@ -92,7 +112,7 @@ a img {
   text-align: center;
   display: inline-block;
   transition: all 0.4s ease;
-  margin-left: 40px;
+  margin-left: 50px;
   min-width: 80px;
   padding: 10px; 
   white-space: nowrap; 
@@ -116,6 +136,13 @@ a img {
 
 }
 
+
+.arrow {
+  position: fixed;
+  bottom: 3em;
+  right: 4em;
+  width: 3em;
+}
 
 
 
@@ -492,7 +519,7 @@ a img {
   }
 
   .media-element {
-    padding: 0.8rem; /* Smaller padding for small screens */
+    padding: 0.8rem;  
   }
  
   .carousel-inner {
