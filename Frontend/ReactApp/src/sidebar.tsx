@@ -62,11 +62,11 @@ const Sidebar: React.FC = () => {
   return (
   
       <nav className="sidebar">
-        <ul className="nav">
+        <ul className="nav d-flex flex-column justify-content-around">
           {sections.map((section) => (
             <li key={section.id} className="nav-item">
               <a
-                className={`nav-link ${activeSection === section.id ? 'active' : ''}`}
+                className={`nav-link align-text-center text-violet ${activeSection === section.id ? 'active' : ''}`}
                 href={`#${section.id}`}
                 data-section={section.id}
                 onClick={(e) => handleNavClick(e, section.id)}

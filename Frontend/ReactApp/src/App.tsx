@@ -24,10 +24,12 @@ function App() {
   const [email, setEmail] = useState<string>('')
   const [success, setSuccess] = useState<string | null>(null)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
-  const [showToast, setShowToast] = useState(false); // Manage toast visibility
+  const [showToast, setShowToast] = useState(false);
+  const [isMainVisible, setIsMainVisible] = useState(true);
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
+
+
   
-
-
   const production = false
   const imageRoot =  production ? '/static/images/' : './images/'
   const baseUrl = production ? window.location.origin : 'http://127.0.0.1:8000';
@@ -41,7 +43,7 @@ function App() {
     }
   });
 
-
+//fetching projects and skills from backend
   useEffect(() => {
     const getProjects = async () => { 
       try {
@@ -76,6 +78,8 @@ function App() {
     }
   }, [projects, skills, axiosInstance, baseUrl])
 
+
+//sending email 
   const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
      setSuccess('sending...')
@@ -99,6 +103,8 @@ function App() {
 
   }
 
+//manage load of elements on scroll
+
   useEffect(() => {
     const sections = document.querySelectorAll('.container');
 
@@ -121,14 +127,15 @@ function App() {
     };
   }, []);
 
+//update skill to display just 4 at a time
+
   const chunkSize = 4;
   const chunkedSkills = [];
   for (let i = 0; i < (skills? skills.length : 0); i += chunkSize) {
     chunkedSkills.push(skills?.slice(i, i + chunkSize));
   }
 
-
-  const [isMainVisible, setIsMainVisible] = useState(true);
+//display arrow when main section is not visible
 
   useEffect(() => {
     const mainSection = document.querySelector("#main");
@@ -139,8 +146,8 @@ function App() {
           setIsMainVisible(entry.isIntersecting);
         },
         {
-          root: null, // Observes viewport
-          threshold: 0.1, // Trigger when 10% of #main is visible
+          root: null,  
+          threshold: 0.1,  
         }
       );
 
@@ -152,18 +159,15 @@ function App() {
     }
   }, []);
 
-  const [screenSize, setScreenSize] = useState(window.innerWidth);
 
-  useEffect(() => {
-    // Handler to update screen size
+//dinamic update of screen size variable
+  useEffect(() => { 
     const handleResize = () => {
       setScreenSize(window.innerWidth,);
     };
-
-    // Add event listener
+ 
     window.addEventListener("resize", handleResize);
-
-    // Clean up the event listener on unmount
+ 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -180,11 +184,11 @@ function App() {
       <div className='sections-wrapper'>
 
         <section id="main">
-          <div className="container p-0  m-0 p-lg-5  ">
-            <Row className="align-items-center  text-sm-center">
+          <div className="container p-0  m-0 p-lg-5">
+            <Row className="align-items-center text-sm-center">
               <Col xs={12} md={6} lg={7} className='text-center pl-5' >
                   <Row >
-                    <h1  className=" m-0   p-0   fw-bold">Anastasiia Skachenko</h1>
+                    <h1 className=" m-0 p-0 fw-bold">Anastasiia Skachenko</h1>
                   </Row>
                   <Row > 
                     <h3 className="p-0">Front-end Developer</h3>
@@ -205,48 +209,44 @@ function App() {
               </Col>
             </Row>
             <Row className="align-items-center justify-content-center mt-0 mt-lg-3 p-0 p-lg-2 ">
-            <Col xs={12} md={12} lg={6} className='p-0 p-lg-2'  >
-                <div className="projects-container ">
+              <Col xs={12} md={12} lg={6} className='p-0 p-lg-2'  >
+                <div className="projects-container p-4">
                   <h4 className='text-white' >Projects</h4>
                     <div className=' row d-grid'>
                       <div className='slider slider-project'>
-                        <div className='slide-track' style={{width: (projects?.length ?? 0) * 2 * 13 + 'em'}}>
+                        <div className='slide-track projects d-flex' style={{width: (projects?.length ?? 0) * 2 * 13 + 'em'}}>
                         {projects?.map((project, index) => (
                           <div key={project.name} 
-                            className={ 'slide-project' }
+                            className= 'slide-project d-flex align-items-center p-2' 
                             onMouseEnter={() => setHoveredProject(index)}
                             onMouseLeave={() => setHoveredProject(null)}>
-                              <a href='#projects'> {hoveredProject === index ? "View More" : project.name}</a>
+                              <a href='#projects' className='text-decoration-none'> {hoveredProject === index ? "View More" : project.name}</a>
                             
                           </div>
                         ))}
                         {projects?.map((project, index) => (
                           <div key={project.name} 
-                            className={ 'slide-project' }
+                            className='slide-project d-flex align-items-center p-2' 
                             onMouseEnter={() => setHoveredProject(index)}
                             onMouseLeave={() => setHoveredProject(null)}>
-                              <a href='#projects'> {hoveredProject === index ? "View More" : project.name}</a>
+                              <a href='#projects' className='text-decoration-none'> {hoveredProject === index ? "View More" : project.name}</a>
                             
                           </div>
                         ))}
-
-                        
- 
                         </div>
-
                       </div>
                     </div>
                 </div>
               </Col>
               <Col xs={12} md={12} lg={6} >
-                <div className="skills-container">
+                <div className="skills-container p-4">
 
                   <h4 className='mb-0 mb-lg-4 text-white'>Skills</h4>
                   <div className="row d-grid">
-                    <div className='slider'>
-                      <div className='slide-track' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
+                    <div className='slider position-relative d-grid '>
+                      <div className='slide-track d-flex' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
                       {skills?.map(skill => (
-                        <div key={skill.name} className='slide-skill'>
+                        <div key={skill.name} className='slide-skill d-flex align-items-center p-2'>
                           <img src={imageRoot + skill.image}  />
                         </div>
                       ))}

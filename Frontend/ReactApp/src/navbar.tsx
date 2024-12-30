@@ -25,12 +25,12 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className="navbar  p-0">
       <div  >
         {/* Hamburger menu button */}
         <button
           onClick={toggle}
-          className="toggler"
+          className="toggler mt-0"
           type="button"
           aria-controls="navbarNav"
           aria-expanded={!isCollapsed ? 'true' : 'false'}
@@ -41,11 +41,11 @@ const Navbar: React.FC = () => {
 
         {/* Navbar Links */}
         <div className={`collapse navbar-collapse ${!isCollapsed ? 'show' : ''}`} id="navbarNav">
-          <ul className="navbar-nav">
+          <ul className="navbar-nav p-3">
             {sections.map((section, index) => (
               <li key={index} className="nav-item">
                 <a
-                  className="nav-link-h"
+                  className="text-decoration-none text-violet"
                   href={"#" + section.id}
                   onClick={handleLinkClick} // Collapse navbar when link is clicked
                 >
