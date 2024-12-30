@@ -23,6 +23,8 @@ html, body {
 }
 
 section {
+  overflow-y: hidden;
+
   scroll-snap-align: start;
   padding: 2em 9em; 
   width: 100%;
@@ -79,9 +81,55 @@ a img {
   transform: scale(1.3);
 
 }
+/* Navbar                                                                                                            NAVBAR  */
 
+.navbar {
+  width: 100%;
+  height: 3em;
+  position: fixed;
+  z-index: 1000;
+  padding: 0px;
+  top: 0;
+  left: 0;
+  background-color: white;
 
+}
 
+.navbar-nav {
+  background-color: white;
+  opacity: 0.9;
+  width: 10em;
+  padding: 1em;
+  height: 95vh;
+  gap: 1em;
+}
+
+.toggler {
+  background-color: white;
+  margin-top: 0;
+}
+
+.nav-link-h {
+  color:#3B1E54;
+  text-decoration: none;
+}
+
+.nav-link-h:hover {
+  color:#000000;
+  border: none; 
+  
+}
+ 
+
+.navbar-toggler {
+  width: 10px;
+  outline: 0 !important;
+  border: none !important;
+  background-color: transparent; /* If you want a transparent button background */
+}
+
+ 
+ 
 
 /* sidebar navigation                                                                                               SIDEBAR */
 .sidebar {
@@ -94,6 +142,8 @@ a img {
   top: 0;
   left: 0;
 }
+
+ 
 
 .nav {
   height: 90%;
@@ -120,7 +170,7 @@ a img {
 
 .nav-link.active {
   font-weight: bold;
-  color: #000000;
+  color:#3B1E54;
   transform:  scale(1.7);
 }
 
@@ -132,7 +182,7 @@ a img {
 .nav-link:hover {
   transform: rotate(90deg) scale(1.4);
   margin-left: 50px;
-  color: black
+  color:#3B1E54
 
 }
 
@@ -152,7 +202,8 @@ a img {
   width: 80%; 
 }
  
-.skills-container {
+.skills-container, .projects-container {
+  height: 13em;
   padding: 2em;
   background-color: #9B7EBD;
   border-radius: 1em;
@@ -161,7 +212,7 @@ a img {
  
 /* slider for skills  */
 
-.slider {
+.slider, .slider-project {
   height: 5em;
   position: relative;
   margin: auto;
@@ -169,6 +220,10 @@ a img {
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+
+.slider-project {
+  height: 7em;
 }
 
 .slide-track {
@@ -209,35 +264,11 @@ a img {
 }
 
 
-/*slider for projects*/
-.slider-projects {
-  height: 10em;
-  position: relative;
-  margin: auto;
-  width: 100%;
-  display: grid;
-  gap: 5em;
-  place-items: center;
-  overflow: scroll;
-}
 
-.slide-track-projects {
-  display: flex;
-}
-
-
-
-.slider-projects::-webkit-scrollbar {
-  display: none;
-}
-
-.slider-projects::-webkit-scrollbar-thumb {
-  display: none;
-}
  
 
 .slide-project {
-  height: 5em;
+  height: 6em;
   width: 13em;
   display: flex;
   align-items: center;
@@ -245,7 +276,7 @@ a img {
   background-color: white;
   border-radius: 1em;
   transition: transform 1s;
-
+  margin-right: 0.5em;
 }
 
 .slide-project:hover {
@@ -255,10 +286,7 @@ a img {
   
 }
 
-
-.slide-project.second {
-  margin-top: 3em;
-}
+ 
  
 
 .slide-project a {
@@ -321,7 +349,7 @@ a img {
 
 #carouselProjects{
   width: 75%;
-}
+ }
  
 
 /* tools*/
@@ -341,71 +369,12 @@ a img {
 /*  CONTACT ME CONTACT ME CONTACT ME                                                                                        CONTACT ME*/
 
 .fields{
-  min-width: 300px;
+  min-width: 380px;
   max-width: 700px;
 }
 
 
-
-
-
-
-
-@media (max-width: 770px) {
-  .container {
-    padding: 0em;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;  
-    align-items: center;  
-    gap: 2em;
-    }
  
-    /*
-   .circle {
-    width: 15em;  
-    height: 15em;
-    margin-top: 2em;
-    margin-bottom: 0em;
-  }
-
-  .circle img { 
-    object-fit: cover;
-  }
-
- 
-    */
- 
-}
-
-/*
-@media (max-width: 1070) {
-  circle {
-    width: 17em;
-    height: 17em
-  }
- 
-}*/
-
-
-@media (max-width: 576px) {
-  #projects {
-    padding: 0.5em;
-  }
-
-  .project-card { 
-    margin: 0px;
-  }
- 
-
-  .btn {
-    font-size: 0.75rem;
-    padding: 0.4rem 0.8rem;
-  }
-}
-
-
-
  
 .media-scroller { 
   width: 75%;
@@ -460,7 +429,7 @@ a img {
  
  
 .carousel-inner {
-  padding: 8em; 
+  padding: 4em; 
 }
 
 .project-card {
@@ -493,21 +462,95 @@ a img {
     height: 12em; /* Reduce height */
   }
 
+  section {
+    padding: 5em 2em 1em 5em; 
+  }
+
   .media-element {
     padding: 1rem; /* Smaller padding */
   }
 }
-@media (max-width: 770px) {
-  .media-scroller {
-    max-width: 40%; 
-    grid-auto-columns: 35%; /* Wider grid items */
-    height: 13em; /* Reduce height */
+@media (max-width: 770px) and (min-width: 430px) { 
+  .container p, .container label  {
+    font-size: 1.3em;
+    max-width: 500px;
   }
 
- }
- 
+  #main {
+    padding-top: 8em;
+  }
 
-/* Small Screens: 576px and below */
+ 
+}
+
+@media (max-width: 770px) {
+  
+
+  .media-scroller {
+    max-width: 35%; 
+    grid-auto-columns: 35%; /* Wider grid items */
+    height: 16em;  
+    padding: 1em 4em 2em;  
+
+  }
+
+ 
+  
+
+  .nav-link { 
+    margin-left: 44px;
+    font-size: 1em;
+    color:#3B1E54;
+  }
+
+  .nav-link.active {
+    margin-left: 30px;
+  }
+ 
+  #carouselProjects {
+    width: 70%;
+  }
+
+  .media-element {
+    padding: 0.8rem;  
+  }
+
+ 
+  #root {
+    font-size: small;
+  }
+
+  .container {
+    padding: 0em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;  
+    align-items: center;  
+    gap: 2em;
+  }
+
+  section {
+    padding: 5em 2em 1em 5em; 
+  }
+
+  .lead {
+    font-size: 1.3em;
+  }
+
+  .projects-container {
+    display: none;
+  }
+
+  .arrow {
+    bottom: 2em;
+    right: 2em;
+    width: 3em;
+  
+  }
+ 
+ 
+}
+ 
 @media (max-width: 600px) {
  
 
@@ -518,9 +561,7 @@ a img {
 
   }
 
-  .media-element {
-    padding: 0.8rem;  
-  }
+
  
   .carousel-inner {
     padding: 0px;
@@ -537,20 +578,79 @@ a img {
   }
 }
 
+@media (max-width: 576px) {
+  #projects {
+    padding: 0.5em;
+  }
+
+  .project-card { 
+    margin: 0px;
+  }
+
+  #main {
+    padding: 4em 1em;
+  }
+ 
+
+  .btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+
 @media (max-width: 450px) {
+  section {
+    padding: 4em 1em;
+  }
+
+  .container p, .container label {
+    font-size: 1.2em;
+    max-width: 320px;
+  }
+
+
   .media-scroller {
     max-width: 30%; 
     grid-auto-columns: 85%; /* Almost full width */
     padding: 0.2em 1em 1em; /* Smaller padding */
     height: 13em; /* Reduce height further */
   }
+
+  .fields {
+    min-width: 300px;
+  }
+
+  .skills-container {
+    height: 11em;
+    padding: 1em
+  }
+
+  .slide-skill img {
+    height: 3em; 
+  }
+
+  
 }
-@media (max-width: 350px) {
+@media (max-width: 380px) {
   .media-scroller {
     max-width: 20%; 
     grid-auto-columns: 85%; /* Almost full width */
     padding: 0.2em 1em 1em; /* Smaller padding */
-    height: 13em; /* Reduce height further */
+    height: 15em; /* Reduce height further */
+  }
+
+}
+
+
+@media (max-width: 380px) {
+  .container p, .container label {
+    font-size: 1.1em;
+    max-width: 280px;
+  }
+
+  .skills-container {
+    margin-top: 3em;
   }
 }
 

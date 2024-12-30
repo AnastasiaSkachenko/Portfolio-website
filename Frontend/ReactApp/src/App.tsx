@@ -1,12 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Row, Col,} from 'react-bootstrap' 
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import {Row, Col, Toast, ToastContainer } from 'react-bootstrap';
 import './App.css'
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from "universal-cookie"; 
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Project, ProjectFetched, Skill } from './interfaces';
 import Sidebar from './sidebar';
+import Navbar from './navbar';
+
 
 // 3B1E54 9B7EBD D4BEE4 EEEEEE
 
@@ -22,11 +24,13 @@ function App() {
   const [email, setEmail] = useState<string>('')
   const [success, setSuccess] = useState<string | null>(null)
   const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const [showToast, setShowToast] = useState(false); // Manage toast visibility
+  
 
 
   const production = false
   const imageRoot =  production ? '/static/images/' : './images/'
-  const baseUrl = production? window.location.origin : 'http://127.0.0.1:8000';
+  const baseUrl = production ? window.location.origin : 'http://127.0.0.1:8000';
 
   const cookies = new Cookies()
 
@@ -74,8 +78,7 @@ function App() {
 
   const sendEmail = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const baseUrl = window.location.origin;
-    setSuccess('sending...')
+     setSuccess('sending...')
     try {
       await axiosInstance.post(`${baseUrl}/api/send-confirmation/`, 
         {
@@ -84,12 +87,14 @@ function App() {
           body
         }
       );
-      setSuccess('I got your message!')
+      setSuccess(null)
+      setShowToast(true); 
       setName('')
       setBody('')
       setEmail('')
     } catch (error) {
       console.error('Error sending message:', error);
+      setSuccess(null)
     }  
 
   }
@@ -147,31 +152,49 @@ function App() {
     }
   }, []);
 
+  const [screenSize, setScreenSize] = useState(window.innerWidth);
+
+  useEffect(() => {
+    // Handler to update screen size
+    const handleResize = () => {
+      setScreenSize(window.innerWidth,);
+    };
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener on unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []); 
+
   
- 
   
   return (
     <>
-      <Sidebar/>
-      <a href='#main' ><img className='arrow'src={imageRoot + 'up-arrow.png'} style={{display: isMainVisible ? "none" : "block"}}/></a>
+      {screenSize > 430 ? <Sidebar/>: <Navbar/>}
+
+      
+      <a href='#main' ><img className='arrow z-3' src={imageRoot + 'up-arrow.png'} style={{display: isMainVisible ? "none" : "block"}}/></a>
       <div className='sections-wrapper'>
 
-        <section id="main"   >
+        <section id="main">
           <div className="container p-0  m-0 p-lg-5  ">
             <Row className="align-items-center  text-sm-center">
-              <Col xs={12} md={12} lg={7} className='text-center pl-5' >
+              <Col xs={12} md={6} lg={7} className='text-center pl-5' >
                   <Row >
                     <h1  className=" m-0   p-0   fw-bold">Anastasiia Skachenko</h1>
                   </Row>
                   <Row > 
-                    <h3 className=" p-0   ">Front-end Developer</h3>
+                    <h3 className="p-0">Front-end Developer</h3>
                   </Row>
                   <Row className='justify-content-center'>
                   <img src={`${imageRoot}/cat-typing.gif`} style={{width: "5em"}}/>
                   </Row>
 
               </Col>
-              <Col xs={12} md={12} lg={5} className="d-flex justify-content-center  pl-5 pl-md-2 ">
+              <Col xs={12} md={6} lg={5} className="d-flex justify-content-center  pl-5 pl-md-2 ">
                 <Row className='justify-content-center'>
                   <div  className='photo d-flex align-content-center justify-content-center'> 
                       <img src={`${imageRoot}/me13.PNG`} alt="Profile" />
@@ -181,41 +204,34 @@ function App() {
 
               </Col>
             </Row>
-            <Row className="align-items-center justify-content-center  mt-3 p-2">
-            <Col xs={12} md={12} lg={6} className='p-2'  >
-                <div className="skills-container">
+            <Row className="align-items-center justify-content-center mt-0 mt-lg-3 p-0 p-lg-2 ">
+            <Col xs={12} md={12} lg={6} className='p-0 p-lg-2'  >
+                <div className="projects-container ">
                   <h4 className='text-white' >Projects</h4>
                     <div className=' row d-grid'>
-                      <div className='slider-projects'>
-                        <div className='slide-track-projects' style={{width: (projects?.length ?? 0) * 2 * 10 + 'em'}}>
+                      <div className='slider slider-project'>
+                        <div className='slide-track' style={{width: (projects?.length ?? 0) * 2 * 13 + 'em'}}>
                         {projects?.map((project, index) => (
                           <div key={project.name} 
-                            className={(index % 2 == 0)? 'slide-project second' :'slide-project' }
+                            className={ 'slide-project' }
                             onMouseEnter={() => setHoveredProject(index)}
                             onMouseLeave={() => setHoveredProject(null)}>
                               <a href='#projects'> {hoveredProject === index ? "View More" : project.name}</a>
                             
                           </div>
                         ))}
+                        {projects?.map((project, index) => (
+                          <div key={project.name} 
+                            className={ 'slide-project' }
+                            onMouseEnter={() => setHoveredProject(index)}
+                            onMouseLeave={() => setHoveredProject(null)}>
+                              <a href='#projects'> {hoveredProject === index ? "View More" : project.name}</a>
+                            
+                          </div>
+                        ))}
+
                         
-                        <div  
-                            className={'slide-project second' }
-                            onMouseEnter={() => setHoveredProject(3)}
-                            onMouseLeave={() => setHoveredProject(null)}>
-                              <p>{hoveredProject === 3 ? "View More" : "non oblect2"}</p>
-                            
-                          </div>
-
-                          <div  
-                            className={'slide-project' }
-                            onMouseEnter={() => setHoveredProject(4)}
-                            onMouseLeave={() => setHoveredProject(null)}>
-                              <p>{hoveredProject === 4 ? "View More" : "non oblect"}</p>
-                            
-                          </div>
-
-
-
+ 
                         </div>
 
                       </div>
@@ -225,13 +241,13 @@ function App() {
               <Col xs={12} md={12} lg={6} >
                 <div className="skills-container">
 
-                  <h4 className='mb-4 text-white'>Skills</h4>
+                  <h4 className='mb-0 mb-lg-4 text-white'>Skills</h4>
                   <div className="row d-grid">
                     <div className='slider'>
                       <div className='slide-track' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
                       {skills?.map(skill => (
                         <div key={skill.name} className='slide-skill'>
-                          <img src={imageRoot + skill.image} className='skill-image'/>
+                          <img src={imageRoot + skill.image}  />
                         </div>
                       ))}
                       {skills?.map(skill => (
@@ -281,7 +297,7 @@ function App() {
         </div>
         <div className="col-12 col-sm-6  ">
           <h5 className='fw-bold d-none d-sm-block'>Follow Me</h5>
-          <ul className="list-unstyled d-flex align-items-center justify-content-center mt-0 mt-sm-3">
+          <ul className="list-unstyled d-flex align-items-center justify-content-center mt-0 mt-sm-3 gap-2">
             <li><a href="http://linkedin.com/in/anastasiia-skachenko" target="_blank" rel="noopener noreferrer" className="text-violet">
               <img src={imageRoot + 'linkedIn.png'} alt="LinkedIn"/>
             </a></li>
@@ -297,7 +313,7 @@ function App() {
           </div>
         </section>
 
-        <section id="projects" className='d-flex  align-items-center'>
+        <section id="projects" className='d-flex  align-items-center px-0'>
           <div className="container">
             <div >
               <h1 className=" mb-4 text-center">Projects</h1>
@@ -387,9 +403,11 @@ function App() {
 
 
       <section id="contact" className=" d-flex  align-items-center p-0">
-        <div className="container text-center p-0">
+
+        <div className="container text-center  ">
+
           <h1 className='mb-0' >Contact Me</h1>
-          <p className="lead mb-0 ">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
+          <p className=" my-3">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
           <div className="row justify-content-center">
             <div className="fields">
               <form  onSubmit={sendEmail}>
@@ -409,6 +427,17 @@ function App() {
                   <button type="submit" className="btn btn-dark ">Send Message</button>
                 </div>
                 {success && <p className='success'>{success}</p>}
+                <ToastContainer position="top-end" className='mt-4'>
+                  <Toast
+                    show={showToast}
+                    onClose={() => setShowToast(false)}
+                    delay={3000} // Duration for auto-hide in milliseconds
+                    autohide
+                  >
+                     
+                    <Toast.Body>I got your message!</Toast.Body>
+                  </Toast>
+                </ToastContainer>
               </form>
             </div>
           </div>
@@ -416,8 +445,6 @@ function App() {
         
       </section>
     </div>
-
-
   </>
   )
 }
