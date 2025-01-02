@@ -30,7 +30,7 @@ function App() {
 
 
   
-  const production = false
+  const production = true
   const imageRoot =  production ? '/static/images/' : './images/'
   const baseUrl = production ? window.location.origin : 'http://127.0.0.1:8000';
 
@@ -183,7 +183,7 @@ function App() {
       <a href='#main' ><img className='arrow z-3' src={imageRoot + 'up-arrow.png'} style={{display: isMainVisible ? "none" : "block"}}/></a>
       <div className='sections-wrapper'>
 
-        <section id="main">
+        <section id="main" className=' d-flex' >
           <div className="container p-0  m-0 p-lg-5">
             <Row className="align-items-center text-sm-center">
               <Col xs={12} md={6} lg={7} className='text-center pl-5' >
@@ -238,7 +238,7 @@ function App() {
                     </div>
                 </div>
               </Col>
-              <Col xs={12} md={12} lg={6} >
+              <Col xs={12} md={12} lg={6}  className='d-flex justify-content-center'>
                 <div className="skills-container p-4">
 
                   <h4 className='mb-0 mb-lg-4 text-white'>Skills</h4>
@@ -247,7 +247,7 @@ function App() {
                       <div className='slide-track d-flex' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
                       {skills?.map(skill => (
                         <div key={skill.name} className='slide-skill d-flex align-items-center p-2'>
-                          <img src={imageRoot + skill.image}  />
+                          <img src={imageRoot + skill.image} className='skill-image' />
                         </div>
                       ))}
                       {skills?.map(skill => (
@@ -270,13 +270,13 @@ function App() {
 
         <section id="about-me" className="d-flex align-items-center justify-content-center">
           <div className="container">
-            <div className="row justify-content-center">
-              <div className="col-12 col-md-8 col-lg-6 text-center">
+            <Row className="justify-content-center">
+              <div className="col-12 col-md-6 col-lg-6  text-center justify-content-center ">
                 <h1 className="mb-4">About Me</h1>
-                <p className="lead">
+                <p className='text-center w-100' >
                   I am a Front-End Developer with 2 years of experience building
                   applications using vanilla JavaScript and React.js. I have developed
-                  user-friendly and visually appealing applications for industries such
+                  user-friendly and visually appealing applications for business such
                   as beauty salons and restaurants. While I specialize in front-end
                   development, I have a strong foundation in web technologies,
                   ensuring seamless integration of responsive designs with back-end
@@ -284,8 +284,8 @@ function App() {
                 </p>
 
               </div>
-            </div>
-            <footer className="text-violet py-3 py-sm-4 py-md-5 mt-5 ">
+            </Row>
+            <footer className="text-violet py-3 py-sm-4 py-md-2 mt-0 mt-lg-5 ">
       <div className=" text-center">
       <div className="row">
         <div className="col-12 col-sm-6">
@@ -313,7 +313,7 @@ function App() {
           </div>
         </section>
 
-        <section id="projects" className='d-flex  align-items-center px-0'>
+        <section id="projects" className='d-flex  align-items-center'>
           <div className="container">
             <div >
               <h1 className=" mb-4 text-center">Projects</h1>
@@ -402,13 +402,12 @@ function App() {
       </section>
 
 
-      <section id="contact" className=" d-flex  align-items-center p-0">
-
-        <div className="container text-center  ">
-
-          <h1 className='mb-0' >Contact Me</h1>
-          <p className=" my-3">Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
-          <div className="row justify-content-center">
+      <section id="contact" >
+        <div className="container text-center align-items-center  ">
+          <h1 className='mb-0 text-center' >Contact Me</h1>
+          <p  >Feel free to get in touch with me for collaboration, feedback, or just a friendly chat!</p>
+      
+          <Row className="justify-content-center ">
             <div className="fields">
               <form  onSubmit={sendEmail}>
                 <div className="mb-3">
@@ -440,7 +439,7 @@ function App() {
                 </ToastContainer>
               </form>
             </div>
-          </div>
+          </Row>
         </div>
         
       </section>

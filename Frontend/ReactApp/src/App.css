@@ -5,6 +5,7 @@
   --text-violet: #3B1E54;
   --light: #EEEEEE;
   --light-background: #ffffff;
+  --light-background-transparent: #ffffffc6;
 }
 
 
@@ -34,16 +35,20 @@ html, body {
 section {
   overflow-y: hidden;
   scroll-snap-align: start;
-  padding: 2em 9em; 
+  padding: 7em 9em 0em 11em; 
   width: 100%;
-  height: 100vh;
+  height: 100vh; 
+  display: flex;
+  align-items: center;
 }
 
 #main, #projects, #contact {
   background-color: var(--light-pink);
 }
 
- 
+ #skills {
+  overflow-x: hidden;
+ }
 
 .text-violet {
   color: var(--text-violet)
@@ -52,11 +57,7 @@ section {
 a img {
   width: 30px;
 }
-
-#contact {
-  padding: 0px;
-
-}
+ 
 
  
 .container {
@@ -96,20 +97,19 @@ a img {
   z-index: 1000;
   top: 0;
   left: 0;
-  background-color: var(--light-background);
+  background-color: var(--light-background-transparent);
 
 }
 
 .navbar-nav {
-  background-color: var(--light-background);
-  opacity: 0.9;
+  background-color: var(--light-background-transparent);
   width: 8em;
   height: 95vh;
   gap: 1em;
 }
 
 .toggler {
-  background-color: var(--light-background);
+  background-color:#ffffff00;
 }
 
 .text-decoration-none { 
@@ -285,6 +285,9 @@ a img {
 }
 
  
+.container .row {
+  min-width: 100%;
+}
 
 
 
@@ -295,7 +298,9 @@ a img {
 
 #carouselProjects{
   width: 75%;
- }
+}
+
+
  
 
 /* tools*/
@@ -309,6 +314,33 @@ a img {
   margin-left: 30px;
 }
 
+.carousel-inner {
+  padding: 1em 5em 5em 4em; 
+ }
+
+ 
+.project-card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #EEEEEE;
+  margin: 1em 2em;
+  transition: all 0.3s ease;
+  height: 350px; 
+ }
+
+.project-card:hover {
+  transform: scale(1.1);
+  background-color: #9B7EBD;
+  color: white;
+  border-radius: 1em;
+}
+
+.project-card:hover button{
+  color:white;
+  border-color: white;
+}
+
+
 
 
 
@@ -317,6 +349,7 @@ a img {
 .fields{
   min-width: 380px;
   max-width: 700px;
+  margin-left: 0px;
 }
 
  
@@ -366,30 +399,6 @@ a img {
 
  
  
-.carousel-inner {
-  padding: 4em; 
-}
-
-.project-card {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  background-color: #EEEEEE;
-  margin: 1em 2em;
-  transition: all 0.3s ease;
-
-}
-
-.project-card:hover {
-  transform: scale(1.1);
-  background-color: #9B7EBD;
-  color: white;
-  border-radius: 1em;
-}
-
-.project-card:hover button{
-  color:white;
-  border-color: white;
-}
 
  
 
@@ -415,9 +424,14 @@ a img {
     max-width: 500px;
   }
 
-  #main {
-    padding-top: 8em;
+ 
+
+  .skills-container {
+    height: 11em;
+    max-width: 500px;
   }
+
+ 
 
  
 }
@@ -431,6 +445,10 @@ a img {
 
   }
 
+  #root {
+    font-size: 13px;
+  }
+
   .nav-link { 
     margin-left: 44px;
     font-size: 1em;
@@ -441,13 +459,30 @@ a img {
   }
  
   #carouselProjects {
-    width: 70%;
+    width: 80%;
   }
 
   .media-element {
     padding: 0.8rem;  
   }
 
+  .project-card {
+    height: 400px;
+    width: 90%;
+  }
+
+
+  .project-card:hover {
+    transform: none;
+    background-color: #EEEEEE;
+    color: inherit;
+    border-radius: 8px;
+  }
+
+  .project-card:hover button {
+    color: inherit;
+    border-color: inherit;
+  }
  
 
   .container {
@@ -475,8 +510,12 @@ a img {
     bottom: 2em;
     right: 2em;
     width: 3em;
-  
   }
+
+  .fields {
+    max-width: 70%;
+  }
+ 
  
 }
  
@@ -490,12 +529,11 @@ a img {
 
   }
 
-
- 
   .carousel-inner {
-    padding: 0px;
-    margin: 0px;
+    padding: 0em 0em 4em 0em;
   }
+ 
+
  
 
   .card-title {
@@ -533,9 +571,14 @@ a img {
     padding: 4em 1em;
   }
 
-  .container p, .container label {
-    font-size: 1.2em;
-    max-width: 320px;
+  .project-card {
+    width: 97%;
+    height: 400px;
+  }
+ 
+
+  .photo img {
+    width: 60%;
   }
 
 
@@ -547,21 +590,25 @@ a img {
   }
 
   .fields {
-    min-width: 300px;
+    min-width: 90%;
   }
 
   .skills-container {
     height: 11em;
-    padding: 1em
+    padding: 1em;
   }
 
   .slide-skill img {
     height: 3em; 
+    width: 3em;
   }
 
   
 }
 @media (max-width: 380px) {
+  #projects {
+    padding-top: 5em;
+  }
   .media-scroller {
     max-width: 20%; 
     grid-auto-columns: 85%; /* Almost full width */
@@ -569,13 +616,19 @@ a img {
     height: 15em; /* Reduce height further */
   }
 
-  .container p, .container label {
-    font-size: 1.1em;
-    max-width: 280px;
+ 
+  #carouselProjects {
+    width: 90%;
   }
 
-  .skills-container {
-    margin-top: 3em;
+  .project-card {
+    height: 420px;
+  }
+
+ 
+
+  .photo img {
+    width: 80%;
   }
 
 
