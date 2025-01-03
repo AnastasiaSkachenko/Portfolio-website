@@ -24,7 +24,7 @@ function App() {
 
 
   
-  const production = false
+  const production = true
   const imageRoot =  production ? '/static/images/' : './images/'
   const baseUrl = production ? window.location.origin : 'http://127.0.0.1:8000';
 
