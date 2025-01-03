@@ -10,12 +10,6 @@ import Sidebar from './sidebar';
 import Navbar from './navbar';
 
 
-// 3B1E54 9B7EBD D4BEE4 EEEEEE
-
- 
-
- 
-
 function App() {
   const [projects, setProjects] = useState<Project[]>()
   const [skills, setSkills] = useState<Skill[]>()
@@ -30,7 +24,7 @@ function App() {
 
 
   
-  const production = true
+  const production = false
   const imageRoot =  production ? '/static/images/' : './images/'
   const baseUrl = production ? window.location.origin : 'http://127.0.0.1:8000';
 
@@ -43,40 +37,69 @@ function App() {
     }
   });
 
+
 //fetching projects and skills from backend
-  useEffect(() => {
-    const getProjects = async () => { 
-      try {
-        const response = await axiosInstance.get(`${baseUrl}/api/get-project/`);
-        const fetchedProjects = response.data.projects.map((project: ProjectFetched) => ({
-          ...project,
-          tools: project.tools.split(','), 
-        }));
-        setProjects(fetchedProjects);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      }
-    };
-    
-    const getSkills = async () => { 
-      try {
-        const response = await axiosInstance.get(`${baseUrl}/api/get-skill/`);
-        const fetchedSkills = response.data.skills
-        setSkills(fetchedSkills);
-      } catch (error) {
-        console.error('Error fetching skills:', error);
-      }
-    };
-
-
-    if (!projects?.[1]) {
-      getProjects()
+useEffect(() => {
+  const getProjects = async () => { 
+    try {
+      const response = await axiosInstance.get(`${baseUrl}/api/get-project/`);
+      const fetchedProjects = response.data.projects.map((project: ProjectFetched) => ({
+        ...project,
+        tools: project.tools.split(','), 
+      }));
+      setProjects(fetchedProjects);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
     }
-
-    if (!skills?.[1]) {
-      getSkills()
+  };
+  
+  const getSkills = async () => { 
+    try {
+      const response = await axiosInstance.get(`${baseUrl}/api/get-skill/`);
+      const fetchedSkills = response.data.skills
+      setSkills(fetchedSkills);
+    } catch (error) {
+      console.error('Error fetching skills:', error);
     }
-  }, [projects, skills, axiosInstance, baseUrl])
+  };
+
+
+  if (!projects?.[1]) {
+    getProjects()
+    console.log(projects)
+  }
+
+  if (!skills?.[1]) {
+    getSkills()
+  }
+}, [projects, skills, axiosInstance, baseUrl])
+
+
+useEffect(() => {
+  const sections = document.querySelectorAll('.container');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');  
+      } else {
+        entry.target.classList.remove('visible');  
+      } 
+    });
+  }, { threshold: 0.1 }); 
+
+  sections.forEach((section) => {
+    observer.observe(section);
+  });
+
+  return () => {
+    sections.forEach((section) => {
+      observer.unobserve(section);
+    });
+    observer.disconnect();
+  };
+}, []);
+
 
 
 //sending email 
@@ -105,27 +128,6 @@ function App() {
 
 //manage load of elements on scroll
 
-  useEffect(() => {
-    const sections = document.querySelectorAll('.container');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');  
-        }  
-      });
-    }, { threshold: 0.1 }); 
-
-    sections.forEach((section) => {
-      observer.observe(section);
-    });
-
-    return () => {
-      sections.forEach((section) => {
-        observer.unobserve(section);
-      });
-    };
-  }, []);
 
 //update skill to display just 4 at a time
 
@@ -245,16 +247,16 @@ function App() {
                   <div className="row d-grid">
                     <div className='slider position-relative d-grid '>
                       <div className='slide-track d-flex' style={{width: (skills?.length ?? 0) * 2 * 15 + 'em'}}>
-                      {skills?.map(skill => (
-                        <div key={skill.name} className='slide-skill d-flex align-items-center p-2'>
-                          <img src={imageRoot + skill.image} className='skill-image' />
-                        </div>
-                      ))}
-                      {skills?.map(skill => (
-                        <div key={skill.name} className='slide-skill'>
-                          <img src={imageRoot + skill.image} className='skill-image'/>
-                        </div>
-                      ))}
+                        {skills?.map(skill => (
+                          <div key={skill.name} className='slide-skill d-flex align-items-center p-2'>
+                            <img src={imageRoot + skill.image} className='skill-image' />
+                          </div>
+                        ))}
+                        {skills?.map(skill => (
+                          <div key={skill.name} className='slide-skill d-flex align-items-center p-2'>
+                            <img src={imageRoot + skill.image} className='skill-image'/>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
