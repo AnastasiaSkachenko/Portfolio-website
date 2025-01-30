@@ -37,8 +37,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 #    os.getenv('ALLOWED_HOSTS')
 ]
-print('allowed hosts', ALLOWED_HOSTS)
-print('cors allowed origin', CORS_ALLOWED_ORIGINS)
+ 
+
 
 # Application definition
 
@@ -51,7 +51,26 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'backend',
     'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -91,7 +110,7 @@ WSGI_APPLICATION = 'Portfolio.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'database.sqlite3',
     }
 }
 
@@ -115,12 +134,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+ 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Stockholm'
+
 
 USE_I18N = True
 
@@ -139,6 +161,9 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = os.path.join(BASE_DIR, '/media/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
