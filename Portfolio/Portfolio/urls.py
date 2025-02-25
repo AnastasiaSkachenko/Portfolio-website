@@ -24,6 +24,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('backend.urls')),
+    path('cc/', include('caloriesCounter.urls')),
     path('', views.index, name='index' )
 ]
 

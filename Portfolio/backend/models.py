@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _ 
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from .managers import UserManager
 
 
 def upload_to(instance, filename): 
@@ -13,10 +14,10 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     email = models.EmailField(unique=True)  # Ensure email is unique and required
-
     name = models.CharField(max_length=150, default='')
+    image = models.ImageField(_('Image'), upload_to=upload_to, blank=True, default='cat-user.jpeg')
+
     age = models.IntegerField(default=18)
-    image = models.ImageField(_('Image'), upload_to=upload_to, blank=True)
     calories_d = models.IntegerField(null=True)
     protein_d = models.IntegerField(null=True)
     carbohydrate_d = models.IntegerField(null=True)
@@ -24,9 +25,12 @@ class User(AbstractUser):
     height = models.IntegerField(null=True, blank=True)
     weight = models.IntegerField(default=0)
     activity_level = models.IntegerField(default=1)
+    gender = models.CharField(max_length=10, default='woman')
+    goal = models.CharField(max_length=20, default='loss')
     USERNAME_FIELD = 'email'  # Set email as the primary username field
     REQUIRED_FIELDS = ['name']  # List required fields other than email
 
+    objects = UserManager()  
 
     groups = models.ManyToManyField(
         Group,
@@ -69,6 +73,7 @@ class Product(models.Model):
     protein = models.IntegerField()
     carbohydrate = models.IntegerField()
     fat = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productAuthor', default=2)
 
 class Dish(models.Model):
     TYPE_CHOICES = [
@@ -91,6 +96,9 @@ class Dish(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='dish', null=True, blank=True)
     portion = models.IntegerField(default=100, null=True, blank=True)
     portions = models.IntegerField(default=1, null=True, blank=True)
+    description = models.TextField(default='')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='dishAuthor', default=2, null=True)
+
 
     def save(self, *args, **kwargs):
         if not self.image:
@@ -99,18 +107,19 @@ class Dish(models.Model):
 
 
 class Ingredient(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ingredientsProduct')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='ingredientsProduct', null=True)
     calories = models.IntegerField()
     protein = models.IntegerField()
     carbohydrate = models.IntegerField()
     fat = models.IntegerField()
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ingredientsDish')
     weight = models.IntegerField(default=0)
+    name = models.CharField(default='')
 
 
 class DiaryRecord(models.Model):
     name = models.CharField(max_length=150, default='')
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='diaryDish', null=True, blank=True)
+    dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDish', null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     calories = models.IntegerField(null=True)
     protein = models.IntegerField(null=True)
@@ -118,4 +127,5 @@ class DiaryRecord(models.Model):
     fat = models.IntegerField(null=True)
     weight = models.IntegerField(default=0)
     portions = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', default=2, null=True)
 

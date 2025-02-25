@@ -1,7 +1,32 @@
 from rest_framework import serializers
 from .models import Project, Skill, Product, Ingredient, Dish, DiaryRecord,  User
+from django.contrib.auth.hashers import make_password
 
 
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+class VerifyCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(min_length=6, max_length=6)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+
+    def save(self, validated_data):
+        email = validated_data["email"]
+        new_password = validated_data["new_password"]
+        user = User.objects.get(email=email)
+        user.password = make_password(new_password)
+        user.save()
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,67 +61,30 @@ class DiarySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'height', 'weight', 'activity_level']
+        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'height', 'weight', 'activity_level', 'email', 'gender', 'goal']
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # write_only ensures password isn't returned in the response
-
-    class Meta:
-        model = User
-        fields = ['id', 'name', 'age', 'email', 'password', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'height', 'weight', 'activity_level']
-
-    def create(self, validated_data):
-        # Create the user object
-        user = User.objects.create(
-            name=validated_data.get('name', ''),
-            age=validated_data.get('age', 18),
-            image=validated_data.get('image', None),
-            username=validated_data.get('email', '')
-        )
-        # Hash the password before saving the user
-        user.set_password(validated_data['password'])
-        user.save()  # Save the user to the database
-        return user
-
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)  # Ensures password isn't returned in the response
     image = serializers.ImageField(required=False)
 
     class Meta:
-        model = User  # Use the related profile model if the user model has extended data
-        fields = [
-            'name', 'password', 'age', 'weight', 'height', 'calories_d', 
-            'protein_d', 'carbohydrate_d', 'fat_d', 'activity_level', 'image'
-        ]
+        model = User
+        fields = ['id', 'name', 'age', 'email', 'password', 'image', 
+                  'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 
+                  'height', 'weight', 'activity_level', 'gender', 'goal']
 
     def create(self, validated_data):
-        # Separate password from profile data
+        # Extract password before creating the user
         password = validated_data.pop('password')
         
-        # Create the user first
-        user = User.objects.create(
-            name=validated_data['name'],
-        )
+        # Create the user
+        user = User.objects.create(**validated_data)
         
         # Hash and set the password
         user.set_password(password)
         user.save()
 
-        # Now create the profile data for the user
-        profile_data = {
-            'user': user,
-            'age': validated_data.get('age', 18),
-            'weight': validated_data.get('weight', 0),
-            'height': validated_data.get('height', 0),
-            'calories_d': validated_data.get('calories_d', 0),
-            'protein_d': validated_data.get('protein_d', 0),
-            'carbohydrate_d': validated_data.get('carbohydrate_d', 0),
-            'fat_d': validated_data.get('fat_d', 0),
-            'activity_level': validated_data.get('activity_level', 1),
-            'image': validated_data.get('image', None),
-        }
-        
-        # Create and save the profile data
-        user_profile = User.objects.create(**profile_data)
-
-        return user_profile
+        return user
     
+
+ 
