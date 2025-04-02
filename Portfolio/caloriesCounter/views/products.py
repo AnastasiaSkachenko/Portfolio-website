@@ -44,10 +44,13 @@ class ProductView(APIView):
         except:
             return Response({"error": 'Failed to fetch products'}, status=status.HTTP_400_BAD_REQUEST)
     
-    def post(self, request ):
-
+    def post(self, request, format=None ):
         
-        data = request.data
+        data = request.data.dict()
+        if 'image' in request.FILES:
+            print('image is in files')
+            data['image'] = request.FILES['image']
+
 
         for field in ['calories', 'protein', 'carbohydrate', 'fat']:
             if data.get(field) == '':
@@ -73,7 +76,7 @@ class ProductView(APIView):
             )
         
             return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
- 
+        print(serializer.errors)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request):
@@ -81,12 +84,17 @@ class ProductView(APIView):
         id = request.query_params.get('id')
 
         product = get_object_or_404(Product, id=id)
-        data = request.data
+        data = request.data.dict()
+
         for field in ['calories', 'protein', 'carbohydrate', 'fat']:
             if data.get(field) == '':
                 data[field] = 0
         
-        data.update(request.FILES)
+        if 'image' in request.FILES:
+            print('image is in files')
+            data['image'] = request.FILES['image']
+
+
 
 
         serializer = ProductSerializer(product, data=data, partial=True)
@@ -97,7 +105,6 @@ class ProductView(APIView):
  
             # Update Dish fields based on the Product instance
             dish.name = instance.name  # Example: Updating name if needed
-            dish.image = data.get('image')  # Example: Updating image if relevant
             dish.calories = instance.calories
             dish.calories_100 = instance.calories
             dish.protein = instance.protein
