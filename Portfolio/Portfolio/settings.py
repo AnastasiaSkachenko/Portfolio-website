@@ -30,15 +30,12 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-0o5sz(!-ybirgz9h#2eu%b3qx8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.0.15,192.168.0.16,0.0.0.0').split(',')
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", 
-    "http://localhost:5174", 
-    "http://127.0.0.1:8000",
-    "http://localhost:8000", 
-#    os.getenv('ALLOWED_HOSTS')
-]
+
+ 
+CORS_ALLOW_ALL_ORIGINS = True
+
  
 CORS_ALLOW_CREDENTIALS = True
  
@@ -55,7 +52,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'caloriesCounter'
+    'caloriesCounter',
+    "django_celery_beat",
 ]
 
 
@@ -76,6 +74,14 @@ REST_FRAMEWORK = {
         'backend.authentication.customJWTAuthentication',
     ),
 }
+
+
+# settings.py
+CELERY_BROKER_URL = "redis://localhost:6379/0"  # Use Redis as the message broker
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),

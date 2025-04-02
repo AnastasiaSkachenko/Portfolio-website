@@ -27,6 +27,9 @@ class User(AbstractUser):
     activity_level = models.IntegerField(default=1)
     gender = models.CharField(max_length=10, default='woman')
     goal = models.CharField(max_length=20, default='loss')
+    favorite_dishes = models.ManyToManyField("Dish", related_name="favorited_by", blank=True)
+    balance = models.IntegerField(default=0)
+
     USERNAME_FIELD = 'email'  # Set email as the primary username field
     REQUIRED_FIELDS = ['name']  # List required fields other than email
 
@@ -42,6 +45,16 @@ class User(AbstractUser):
         related_name='backend_user_permissions_set',  # Custom related_name
         blank=True
     )
+
+
+    def toggle_favorite(self, dish):
+        """Toggle the favorite status of a dish for the user"""
+        if dish in self.favorite_dishes.all():
+            self.favorite_dishes.remove(dish)
+            return False  # Dish removed from favorites
+        else:
+            self.favorite_dishes.add(dish)
+            return True  # Dish added to favorites
 
     def __str__(self):
         return self.email
@@ -69,10 +82,10 @@ class Skill(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=180)
     image = models.ImageField(_('Image'), upload_to=upload_products_to ,default='product.jpeg')
-    calories = models.IntegerField()
-    protein = models.IntegerField()
-    carbohydrate = models.IntegerField()
-    fat = models.IntegerField()
+    calories =models.IntegerField()
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbohydrate = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productAuthor', default=2)
 
 class Dish(models.Model):
@@ -85,12 +98,12 @@ class Dish(models.Model):
     image = models.ImageField(_('Image'), upload_to=upload_dishes_to, blank=True)
     calories = models.IntegerField()
     calories_100 = models.IntegerField(default=0)
-    protein = models.IntegerField()
-    carbohydrate = models.IntegerField()
-    fat = models.IntegerField()
-    protein_100 = models.IntegerField(default=0)
-    carbohydrate_100 = models.IntegerField(default=0)
-    fat_100 = models.IntegerField(default=0)
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbohydrate = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1)
+    protein_100 = models.DecimalField(max_digits=10, decimal_places=1)
+    carbohydrate_100 = models.DecimalField(max_digits=10, decimal_places=1)
+    fat_100 = models.DecimalField(max_digits=10, decimal_places=1)
     drink = models.BooleanField(default=False)
     weight = models.IntegerField(default=0)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='dish', null=True, blank=True)
@@ -98,20 +111,26 @@ class Dish(models.Model):
     portions = models.IntegerField(default=1, null=True, blank=True)
     description = models.TextField(default='')
     user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='dishAuthor', default=2, null=True)
-
+    weight_of_ready_product = models.IntegerField(default=0, null=True, blank=True)
+    is_popular = models.BooleanField(default=False)
+ 
 
     def save(self, *args, **kwargs):
         if not self.image:
             self.image = 'drink.jpeg' if self.drink else 'dish.jpeg'
+
+        if self.weight_of_ready_product is None:  # Set default only if not provided
+            self.weight_of_ready_product = self.weight
+        
         super().save(*args, **kwargs)
 
 
 class Ingredient(models.Model):
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='ingredientsProduct', null=True)
     calories = models.IntegerField()
-    protein = models.IntegerField()
-    carbohydrate = models.IntegerField()
-    fat = models.IntegerField()
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbohydrate = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1)
     dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ingredientsDish')
     weight = models.IntegerField(default=0)
     name = models.CharField(default='')
@@ -122,9 +141,9 @@ class DiaryRecord(models.Model):
     dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDish', null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     calories = models.IntegerField(null=True)
-    protein = models.IntegerField(null=True)
-    carbohydrate = models.IntegerField(null=True)
-    fat = models.IntegerField(null=True)
+    protein = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    carbohydrate = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    fat = models.DecimalField(max_digits=10, decimal_places=1, null=True)
     weight = models.IntegerField(default=0)
     portions = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', default=2, null=True)
