@@ -79,7 +79,7 @@ def update_calories_balance():
     calories_sum = records.aggregate(Sum('calories'))['calories__sum'] or 0
     difference = user.calories_d  - calories_sum
     print('balance before', user.balance)
-    user.balance += difference
+    user.balance -= difference
     user.save()
     print("Calories sum", calories_sum, "user.calories d", user.calories_d, "difference",difference, 'balance', user.balance)
 

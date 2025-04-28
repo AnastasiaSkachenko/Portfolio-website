@@ -7,11 +7,12 @@ from django.db.models import Sum
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.core.paginator import Paginator
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from backend.authentication import customJWTAuthentication
 from django.http import HttpResponseForbidden
 from decimal import Decimal, ROUND_HALF_UP
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
 
@@ -33,46 +34,43 @@ class DishView(APIView):
         print(request.GET, 'request.GET')
         print(request.query_params, 'request.query_params')
 
+        # Start with a queryset
+ 
         if only_no_product:
             dishes = dishes.filter(product__isnull=True)
 
         if query:
             dishes = dishes.filter(name__icontains=query)
 
-
-
         if 'favorites' in filters:
-            if not user.is_authenticated:  # Check if user is anonymous
+            if not user.is_authenticated:
                 return HttpResponseForbidden("You must be logged in to access favorite dishes.")
-            
-            print('favorite dishes', user.favorite_dishes)        
-            favorite_dish_ids = user.favorite_dishes.values_list("id", flat=True)  # Get list of dish IDs
-            dishes = [dish for dish in dishes if dish.id in favorite_dish_ids]            
+            favorite_dish_ids = user.favorite_dishes.values_list("id", flat=True)
+            dishes = dishes.filter(id__in=favorite_dish_ids)
+
         if 'custom' in filters:
-            dishes = [dish for dish in dishes if dish.type == "custom"]
+            dishes = dishes.filter(type="custom")
 
         if 'pre_made' in filters:
-            dishes = [dish for dish in dishes if dish.type == "pre_made"]
+            dishes = dishes.filter(type="pre_made")
 
         if 'own' in filters:
-            if not user.is_authenticated:  # Check if user is anonymous
+            if not user.is_authenticated:
                 return HttpResponseForbidden("You must be logged in to access own dishes.")
-            dishes = [dish for dish in dishes if dish.user == user]
+            dishes = dishes.filter(user=user)
 
         if 'high_protein' in filters:
-            dishes = [dish for dish in dishes if dish.protein_100 > 15]
-            print(dishes)
+            dishes = dishes.filter(protein_100__gt=15)
 
+        if 'low_carbs' in filters:
+            dishes = dishes.filter(carbohydrate_100__lt=10)
 
-        if 'low_carbs'  in filters:
-            dishes = [dish for dish in dishes if dish.carbohydrate_100 < 10]
+        if 'low_fat' in filters:
+            dishes = dishes.filter(fat_100__lt=3)
 
-        if 'low_fat'  in filters:
-            dishes = [dish for dish in dishes if dish.fat_100 < 3]
-
-        if 'suggestions'  in filters:
+        if 'suggestions' in filters:
+            # You override all filters here
             dishes = Dish.objects.filter(is_popular=True).order_by('-id')
-
 
 
         # Pagination
@@ -121,8 +119,13 @@ class DishView(APIView):
 
 
     def post(self, request, format=False):
-        serializer = DishSerializer(data=request.data)
-        
+        data = request.data.dict()
+        if 'image' in request.FILES:
+            print('image is in files')
+            data['image'] = request.FILES['image']
+
+        serializer = DishSerializer(data=data)
+
         if serializer.is_valid(): 
             dish = serializer.save()
             return Response({"id": dish.id}, status=status.HTTP_201_CREATED)
@@ -136,13 +139,20 @@ class DishView(APIView):
         except Dish.DoesNotExist:
             return Response({"error": "Dish not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        request.data.update(request.FILES)
-        serializer = DishSerializer(dish, data=request.data, partial=True)
+        data = request.data.dict()
+
+        if 'image' in request.FILES:
+            print('image is in files')
+            data['image'] = request.FILES['image']
+
+
+
+        serializer = DishSerializer(dish, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
             return Response({"message": "Dish updated successfully"}, status=status.HTTP_200_OK)
-
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request): 
@@ -183,16 +193,34 @@ class IsNameUnique(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
 def getDishById(request, id):
     try:
         dish = Dish.objects.get(id=id)
     except Dish.DoesNotExist:
         return Response({"error": "Dish not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    
     serializer = DishSerializer(dish)
+    dish_data = serializer.data   
 
-    return Response(serializer.data)  
+    ingredients = Ingredient.objects.filter(dish=dish)
+    ingredient_list = []
 
+    for ingredient in ingredients:
+        ingredient_data = IngredientSerializer(ingredient).data
+        if ingredient.product:
+            ingredient_data['name'] = ingredient.product.name
+        ingredient_list.append(ingredient_data)
+
+    dish_data['ingredients'] = ingredient_list
+
+    if request.user.is_authenticated:
+        favorite_dish_ids = set(request.user.favorite_dishes.values_list("id", flat=True))
+        dish_data['favorite'] = dish.id in favorite_dish_ids
+    else:
+        dish_data['favorite'] = False
+
+    return Response(dish_data)
 
 def recalculate_dish(dish_id):
     dish = Dish.objects.get(id=dish_id)

@@ -208,7 +208,6 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 # Modify User View
-
 class ModifyUserView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [customJWTAuthentication]  

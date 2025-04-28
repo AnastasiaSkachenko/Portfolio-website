@@ -85,7 +85,7 @@ class ProductView(APIView):
 
         product = get_object_or_404(Product, id=id)
         data = request.data.dict()
-
+        print(data.get('calories'), 'calories')
         for field in ['calories', 'protein', 'carbohydrate', 'fat']:
             if data.get(field) == '':
                 data[field] = 0
@@ -115,6 +115,7 @@ class ProductView(APIView):
             dish.fat_100 = instance.fat
             dish.save()     
             return Response({"message": "Product updated successfully", "product": serializer.data}, status=status.HTTP_200_OK)
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):

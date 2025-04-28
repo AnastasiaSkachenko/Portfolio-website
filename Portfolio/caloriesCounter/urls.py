@@ -4,9 +4,20 @@ from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView,
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite
 from .views.ingredients import  IngredientView, getIngredientsInDish
+from .views.activity import ActivityRecordView, ExerciseView, WorkoutView, WorkoutExerciseView, TabataView, GetWorkoutById
+
 
 
 urlpatterns = [
+
+    path('activityRecords/', ActivityRecordView.as_view()),
+    path('exercises/', ExerciseView.as_view()),
+    path('workouts/', WorkoutView.as_view()),
+    path('workout-by-id/', GetWorkoutById.as_view()),
+    path('tabatas/', TabataView.as_view()),
+    path('workoutExercises/', WorkoutExerciseView.as_view()),
+
+
     path('test/', TestingHere.as_view()),
 
     path('products/', ProductView.as_view(), name='productCreateGet'), 
@@ -35,11 +46,14 @@ urlpatterns = [
 
     path('dishes/names/',  GetDishNames.as_view(), name='getDishNames'),
     path('isNameUnique/', IsNameUnique.as_view(), name='isNameUnique'),
-
+    
 
     path("send-code/", SendVerificationCodeView.as_view(), name="send-code"),
     path("verify-code/", VerifyCodeView.as_view(), name="verify-code"),
     path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
 
+ 
 
 ]
+
+
