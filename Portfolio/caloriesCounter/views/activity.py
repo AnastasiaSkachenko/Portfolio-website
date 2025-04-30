@@ -15,7 +15,8 @@ from backend.serializers import (
     WorkoutTemplateSerializer, 
     WorkoutExerciseSerializer,
     ExerciseSerializer, 
-    TabataTemplateSerializer
+    TabataTemplateSerializer,
+    GETTabataTemplateSerializer
 )
 
 
@@ -44,6 +45,7 @@ class ActivityRecordView(APIView):
 
             if activity.activity_type == "tabata" and activity.related_id:
                 try:
+                    print('tabata id', activity.related_id)
                     workout = TabataTemplate.objects.get(id=activity.related_id)
                     # Serialize the workout or include desired fields
                     data["tabata"] = {
@@ -104,6 +106,41 @@ class ExerciseView(APIView):
         exercises = Exercise.objects.all()
         serializer = ExerciseSerializer(exercises, many=True)
         return Response({'exercises': serializer.data}, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        print(request.data, 'data')
+        serializer = ExerciseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response( {'message': 'successfully created exercise'}, status=status.HTTP_201_CREATED)
+        else:
+            print(serializer.errors)
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request):
+        exercise_id = request.query_params.get('id')
+
+        try:
+            exercise = Exercise.objects.get(id=exercise_id)
+        except Exercise.DoesNotExist:
+            return Response({"error": "Exercise not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ExerciseSerializer(exercise, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Exercise updated successfully"}, status=status.HTTP_200_OK)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request): 
+        id = request.query_params.get('id')
+        print('id', id)
+        exercise = Exercise.objects.get(id=id)
+        exercise.delete()
+        return Response({'message': 'Tabata deleted successfully'}, status=status.HTTP_200_OK)
+
     
          
 class WorkoutExerciseView(APIView):
@@ -196,7 +233,14 @@ class WorkoutView(APIView):
 
 
 
+class GetExerciseById(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        id = request.query_params.get('id')
+        exercise = Exercise.objects.get(id=id)
+        serializer = ExerciseSerializer(exercise)
+        return Response({"exercise": serializer.data}, status=status.HTTP_200_OK)
 
 
 
@@ -210,6 +254,16 @@ class GetWorkoutById(APIView):
         return Response({"workout": serializer.data}, status=status.HTTP_200_OK)
 
 
+class GetTabataById(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        id = request.query_params.get('id')
+        tabata = TabataTemplate.objects.get(id=id)
+        serializer = GETTabataTemplateSerializer(tabata)
+        return Response({"tabata": serializer.data}, status=status.HTTP_200_OK)
+
+
 
 
 
@@ -218,7 +272,7 @@ class TabataView(APIView):
 
     def get(self, request):
         tabatas = TabataTemplate.objects.all()
-        serializer = TabataTemplateSerializer(tabatas, many=True)
+        serializer = GETTabataTemplateSerializer(tabatas, many=True)
         return Response({"tabatas": serializer.data}, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -235,3 +289,32 @@ class TabataView(APIView):
         else:
             print(serializer.errors)
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request):
+        tabata_id = request.query_params.get('id')
+
+        try:
+            tabata = TabataTemplate.objects.get(id=tabata_id)
+        except TabataTemplate.DoesNotExist:
+            return Response({"error": "Workout not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+        serializer = TabataTemplateSerializer(tabata, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Tabata updated successfully"}, status=status.HTTP_200_OK)
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request): 
+        id = request.query_params.get('id')
+        print('id', id)
+        tabata = TabataTemplate.objects.get(id=id)
+        tabata.delete()
+        activities = ActivityRecord.objects.filter(related_id=id)
+        for activity in activities:
+            activity.related_id = None
+            activity.save()
+        return Response({'message': 'Tabata deleted successfully'}, status=status.HTTP_200_OK)

@@ -111,6 +111,11 @@ class ExerciseSerializer(serializers.ModelSerializer):
 
 
 
+class ExerciseSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exercise
+        fields = ['id', 'name']
+
 class WorkoutExerciseSerializer(serializers.ModelSerializer):
     exercise_name = serializers.CharField(source='exercise.name', read_only=True)
     exercise_id = serializers.PrimaryKeyRelatedField(
@@ -150,15 +155,20 @@ class WorkoutTemplateSerializer(serializers.ModelSerializer):
         return exercises_data
 
 
+class GETTabataTemplateSerializer(serializers.ModelSerializer):
+    exercises = ExerciseSimpleSerializer(many=True)
+
+    class Meta:
+        model = TabataTemplate
+        fields = ['id', 'name', 'exercises', 'rounds', 'work_seconds', 'rest_seconds', 'duration']
+
+
+
 class TabataTemplateSerializer(serializers.ModelSerializer):
-    exercises = serializers.PrimaryKeyRelatedField(
-        queryset=Exercise.objects.all(), many=True
-    )
+
     class Meta:
         model = TabataTemplate
         fields = '__all__'
-
-
 
 
 

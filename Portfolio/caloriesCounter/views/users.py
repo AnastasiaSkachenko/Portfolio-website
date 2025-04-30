@@ -96,7 +96,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refresh")
         if not  refresh_token:
-            print(request.headers.get('Authorization'), 'headers')
+            #print(request.headers.get('Authorization'), 'headers')
             authorization_header = request.headers.get('Authorization')
             if authorization_header:
                 refresh_token = authorization_header.split(" ")[1]  # Extract the token from "Bearer <token>"
