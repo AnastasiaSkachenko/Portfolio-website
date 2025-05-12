@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _ 
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from .managers import UserManager
+from caloriesCounter.utils import calculate_calories_from_activity_record
 
 
 def upload_to(instance, filename): 
@@ -150,69 +151,37 @@ class DiaryRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', default=2, null=True)
 
 
-from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-class Exercise(models.Model):
-    name = models.CharField(max_length=100)
-    met = models.FloatField()  # MET value
-    is_weight_based = models.BooleanField(default=False)
-    supports_reps = models.BooleanField(default=True)
-    supports_time = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name
 
 
-class WorkoutTemplate(models.Model):
-    name = models.CharField(max_length=100)
-    exercises = models.ManyToManyField(Exercise, through='WorkoutExercise')
-    total_calories = models.PositiveIntegerField(default=0)
-
-
-class WorkoutExercise(models.Model):
-    workout = models.ForeignKey(WorkoutTemplate, on_delete=models.CASCADE)
-    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
-    reps = models.PositiveIntegerField(null=True, blank=True)
-    sets = models.PositiveIntegerField(null=True, blank=True, default=1)
-    time_minutes = models.FloatField(null=True, blank=True)
-    weight_group = models.CharField(max_length=20, choices=[
-        ('none', 'None'),
-        ('1-5', '1–5kg'),
-        ('5-10', '5–10kg'),
-        ('10-15', '10–15kg'),
-        ('15+', '15kg+'),
-    ], default='none')
-
-
-class TabataTemplate(models.Model):
-    name = models.CharField(max_length=100)
-    exercises = models.ManyToManyField(Exercise)  # performed as tabata
-    rounds = models.PositiveIntegerField(default=8)
-    work_seconds = models.PositiveIntegerField(default=20)
-    rest_seconds = models.PositiveIntegerField(default=10)
-    duration = models.PositiveIntegerField(default=4)
 
  
 class ActivityRecord(models.Model):
     ACTIVITY_TYPES = [
-        ('custom_workout', 'Custom Workout'),
-        ('workout_template', 'Workout Template'),
+        ('workout', 'Workout'),
         ('tabata', 'Tabata'),
         ('run', 'Run'),
         ('walk_time', 'Walk (Time)'),
         ('walk_steps', 'Walk (Steps)'),
         ('interval_run', 'Interval Run'),
+        ('custom', 'Custom activity'),
+        ('volleyball', "Volleyball"),
+        ('stretching', 'Stretching'),
+        ('jumping', 'Jumping')
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES, default='walk_time')
-    related_id = models.PositiveIntegerField(null=True, blank=True)  # e.g. for template ID
     duration_minutes = models.FloatField(null=True, blank=True)
     steps = models.PositiveIntegerField(null=True, blank=True)
     distance_km = models.FloatField(null=True, blank=True)
-    weight_kg = models.FloatField()  # save user’s weight at time of activity
+    weight_kg = models.FloatField() 
+    intensity = models.PositiveIntegerField(default=3)
     calories_burned = models.FloatField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=150, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.calories_burned:
+            self.calories_burned = calculate_calories_from_activity_record(self)
+        super().save(*args, **kwargs)

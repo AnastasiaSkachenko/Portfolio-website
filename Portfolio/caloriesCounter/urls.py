@@ -4,21 +4,13 @@ from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView,
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite
 from .views.ingredients import  IngredientView, getIngredientsInDish
-from .views.activity import ActivityRecordView, ExerciseView, WorkoutView, WorkoutExerciseView, TabataView, GetWorkoutById, GetTabataById, GetExerciseById
+from .views.activity import ActivityRecordView
 
 
 
 urlpatterns = [
 
     path('activityRecords/', ActivityRecordView.as_view()),
-    path('exercises/', ExerciseView.as_view()),
-    path('workouts/', WorkoutView.as_view()),
-    path('workout-by-id/', GetWorkoutById.as_view()),
-    path('tabata-by-id/', GetTabataById.as_view()),
-    path('exercise-by-id/', GetExerciseById.as_view()),
-    path('tabatas/', TabataView.as_view()),
-    path('workoutExercises/', WorkoutExerciseView.as_view()),
-
 
     path('test/', TestingHere.as_view()),
 
