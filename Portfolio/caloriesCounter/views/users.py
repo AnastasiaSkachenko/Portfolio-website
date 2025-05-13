@@ -19,7 +19,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from ..tasks import update_calories_balance, update_popular_dishes
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from ..update_user_nutritions import update_user_nutrition
 
 
 class TestingHere(APIView):
@@ -230,82 +230,14 @@ class ModifyUserView(APIView):
             user = serializer.save()
 
             if recalculate == 'true':
-                user = calculate_macros_for_user(user)  # Ensure this modifies and saves the user
+                user = update_user_nutrition(user)  # Ensure this modifies and saves the user
 
             updated_serializer = UserSerializer(user)  
             return Response({"message": "Profile updated successfully", "user": updated_serializer.data})        
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# function for calculating macros for for for user
-def calculate_macros_for_user(user):
-    """
-    Calculate macros for a given user instance and update the user object.
-    """
-    age = user.age
-    weight = user.weight
-    height = user.height
-    activity_level = user.activity_level
-    gender = user.gender
-    goal = user.goal
-
-    # Calculate BMR using Mifflin-St Jeor Equation
-    if gender == "female":
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161
-    else:
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
-
-    # Activity level multipliers
-    activity_multipliers = {1: 1.2, 2: 1.375, 3: 1.55, 4: 1.725, 5: 1.9}
-    activity_multiplier = activity_multipliers.get(activity_level, 1.2)
-
-    # Calculate TDEE
-    total_calories = round(bmr * activity_multiplier)
-
-    # Adjust calories based on goal
-    goal_multipliers = {
-        "fat_loss": 0.85, "active_fat_loss": 0.75, 
-        "muscle_gain": 1.15, "active_muscle_gain": 1.25, 
-        "maintenance": 1.0
-    }
-    total_calories = round(total_calories * goal_multipliers.get(goal, 1.0))
-
-    # Adjust protein intake based on goal
-    protein_targets = {
-        "fat_loss": 2.2, "active_fat_loss": 2.4, 
-        "muscle_gain": 2.4, "active_muscle_gain": 2.6, 
-        "maintenance": 1.6
-    }
-    protein_per_kg = protein_targets.get(goal, 1.6)
-    protein_d = round(weight * protein_per_kg)
-    protein_calories = protein_d * 4  # 1g protein = 4 kcal
-
-    # Adjust fat intake as a percentage of total calories
-    fat_ratios = {
-        "fat_loss": 0.25, "active_fat_loss": 0.22,
-        "muscle_gain": 0.22, "active_muscle_gain": 0.22,
-        "maintenance": 0.25
-    }
-    fat_ratio = fat_ratios.get(goal, 0.25)
-    fat_d = round((total_calories * fat_ratio) / 9)  # 1g fat = 9 kcal
-    fat_calories = fat_d * 9
-
-    # Carbohydrates: Remaining calories after protein & fat
-    remaining_calories = total_calories - (protein_calories + fat_calories)
-    carbohydrate_d = round(remaining_calories / 4)  # 1g carb = 4 kcal
-
-    # Update user instance
-    user.calories_d = total_calories
-    user.protein_d = protein_d
-    user.carbohydrate_d = carbohydrate_d
-    user.fat_d = fat_d
-    user.save()
-
-    return user
-
-
-
+ 
 
 #                                                                                      reset password logic
 def generate_verification_code():

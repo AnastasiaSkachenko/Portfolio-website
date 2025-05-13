@@ -1,5 +1,5 @@
 from django.urls import path 
-from .views.diary import  DiaryView
+from .views.diary import  DiaryView, DailyGoalView
 from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView, CustomTokenObtainPairView, CustomTokenRefreshView, SendVerificationCodeView, VerifyCodeView, ResetPasswordView, TestingHere
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite
@@ -9,6 +9,8 @@ from .views.activity import ActivityRecordView
 
 
 urlpatterns = [
+    path('dailyGoals/', DailyGoalView.as_view()),
+
 
     path('activityRecords/', ActivityRecordView.as_view()),
 

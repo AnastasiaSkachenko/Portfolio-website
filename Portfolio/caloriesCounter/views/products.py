@@ -52,7 +52,7 @@ class ProductView(APIView):
             data['image'] = request.FILES['image']
 
 
-        for field in ['calories', 'protein', 'carbohydrate', 'fat']:
+        for field in ['calories', 'protein', 'carbohydrate', 'fat', 'fiber', 'sugars', 'caffein']:
             if data.get(field) == '':
                 data[field] = 0
 
@@ -86,7 +86,7 @@ class ProductView(APIView):
         product = get_object_or_404(Product, id=id)
         data = request.data.dict()
         print(data.get('calories'), 'calories')
-        for field in ['calories', 'protein', 'carbohydrate', 'fat']:
+        for field in ['calories', 'protein', 'carbohydrate', 'fat', 'fiber', 'sugars', 'caffein']:
             if data.get(field) == '':
                 data[field] = 0
         

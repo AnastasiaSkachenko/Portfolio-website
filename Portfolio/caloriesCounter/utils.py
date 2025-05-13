@@ -1,3 +1,8 @@
+from django.utils import timezone
+from django.db.models import Sum
+
+
+
 MET_VALUES = {
     'walk_time': 3.5,
     'walk_steps': 3.0,
@@ -34,9 +39,10 @@ def calculate_calories_from_activity_record(record):
 
     # Walking (Steps) special case: 0.04 is an approximation for step-based calorie burning
     if activity_type == 'walk_steps' and steps:
-        # More accurate step-based calorie burn based on MET value
-        met_walk = MET_VALUES.get('walk_steps', 3.0)
-        return round(steps * 0.04 * met_walk, 0)
+        # Average calories per step (tweak this if needed)
+        calories_per_step = 0.035
+        base_weight = 70
+        return round(steps * calories_per_step * (weight_kg / base_weight), 0)
 
     # Walking (Time) special case: burn calories based on MET value and duration
     if activity_type == 'walk_time' and duration_minutes:
@@ -57,3 +63,66 @@ def calculate_calories_from_activity_record(record):
     calories = met * weight_kg * duration_hours
 
     return round(calories, 0)
+
+
+
+def calculate_bmr(user):
+    # Use Mifflin-St Jeor formula as an example
+    if user.gender == 'male':
+        return 10 * user.weight + 6.25 * user.height - 5 * user.age + 5
+    else:
+        return 10 * user.weight + 6.25 * user.height - 5 * user.age - 161
+
+
+
+def recalculate_nutrition_for_today(user, activity_records):
+    today = timezone.now()
+
+    calories_burned_today = activity_records.aggregate(
+        total=Sum('calories_burned')
+    )['total'] or 0
+
+    bmr = calculate_bmr(user)  
+
+    user.calories_d += bmr + calories_burned_today
+    user.bmr = bmr
+
+    # 3. Recalculate daily calorie need
+    total_calories = bmr + calories_burned_today
+
+    # 4. Recalculate macros
+    # Example macro split: 40% carbs, 30% protein, 30% fat
+    protein_ratio = 0.30
+    carbs_ratio = 0.40
+    fat_ratio = 0.30
+
+    protein_grams = round((total_calories * protein_ratio) / 4)
+    carbs_grams = round((total_calories * carbs_ratio) / 4)
+    fat_grams = round((total_calories * fat_ratio) / 9)
+
+    # Optionally add sugar, fiber, caffeine if you have rules/formulas
+    sugar_ratio = 0.05
+    sugar_grams = round((total_calories * sugar_ratio) / 4)
+
+    # Fiber: fixed target (can be customized per user later)
+    fiber_grams = 30
+
+    # Caffeine: fixed safe upper limit
+    caffeine_mg = 400
+
+
+    # 5. Save updated values
+    user.calories_d = total_calories
+    user.protein_d = protein_grams
+    user.carbs_d = carbs_grams
+    user.fat_d = fat_grams
+    user.sugar_d = sugar_grams
+    user.fiber_d = fiber_grams
+    user.caffeine_d = caffeine_mg
+    
+
+    user.save()
+
+    print(f"Updated nutrition for {today.date()}: {total_calories} kcal, {protein_grams}g P, {carbs_grams}g C, {fat_grams}g F")
+
+

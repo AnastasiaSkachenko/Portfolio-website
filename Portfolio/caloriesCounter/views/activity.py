@@ -6,6 +6,9 @@ from backend.authentication import customJWTAuthentication
 from backend.models import ActivityRecord
 from django.db.models import Prefetch
 from backend.serializers import ActivityRecordSerializer 
+from django.utils import timezone
+from caloriesCounter.utils import recalculate_nutrition_for_today
+from ..update_user_nutritions import update_daily_goals
 
 
 class ActivityRecordView(APIView):
@@ -22,6 +25,9 @@ class ActivityRecordView(APIView):
         serializer = ActivityRecordSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+
+            update_daily_goals(request.user)
+
             return Response({"message": "Activity recorded successfully"})
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -31,6 +37,9 @@ class ActivityRecordView(APIView):
         serializer = ActivityRecordSerializer(activity, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
+            update_daily_goals(request.user)
+
             return Response({"message": "Activity record updated successfully"})
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -40,6 +49,9 @@ class ActivityRecordView(APIView):
         id = request.query_params.get('id')
         activity = ActivityRecord.objects.get(id=id)
         activity.delete()
+
+        update_daily_goals(request.user)
+
         return Response({'message': 'activity deleted successfully'}, status=status.HTTP_200_OK)
 
 

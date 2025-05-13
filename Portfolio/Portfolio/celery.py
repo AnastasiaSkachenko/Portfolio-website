@@ -18,5 +18,10 @@ celery_app.conf.beat_schedule = {
     "update-balance-daily": {
         "task": "caloriesCounter.tasks.update_calories_balance",
         "schedule": crontab(hour=8, minute=30)
-    }
+    },
+    "update-nutrition-goals-daily": {
+        "task": "caloriesCounter.tasks.update_goals",
+        "schedule": crontab(hour=8, minute=30)
+    },
+
 }

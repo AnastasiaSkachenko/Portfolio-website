@@ -1,6 +1,6 @@
 from rest_framework.response import Response
-from backend.models import  DiaryRecord
-from backend.serializers import  DiarySerializer
+from backend.models import  DiaryRecord, DailyGoals
+from backend.serializers import  DiarySerializer, DailyGoalSerializer
 from rest_framework.views import APIView
 from rest_framework import  status 
 from django.utils import timezone
@@ -8,6 +8,14 @@ from rest_framework.permissions import IsAuthenticated
 from backend.authentication import customJWTAuthentication
 
 
+class DailyGoalView(APIView): 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [customJWTAuthentication]
+
+    def get(self, request):  
+        records = DailyGoals.objects.filter(user=request.user.id) # Get all records from the table
+        serializer = DailyGoalSerializer(records, many=True)  # Serialize multiple records
+        return Response({'goals':serializer.data}, status=status.HTTP_200_OK)
 
 
 class DiaryView(APIView): 

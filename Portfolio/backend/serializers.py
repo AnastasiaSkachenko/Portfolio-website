@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Skill, Product, Ingredient, Dish, DiaryRecord, User, ActivityRecord
+from .models import Project, Skill, Product, Ingredient, Dish, DiaryRecord, User, ActivityRecord, DailyGoals
 from django.contrib.auth.hashers import make_password
 
 
@@ -60,7 +60,7 @@ class DiarySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'height', 'weight', 'activity_level', 'email', 'gender', 'goal', "balance"]
+        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'fiber_d', 'sugars_d', 'caffein_d', 'height', 'weight', 'activity_level', 'email', 'gender', 'goal', "balance"]
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  # Ensures password isn't returned in the response
@@ -94,5 +94,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ActivityRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActivityRecord
+        fields = '__all__'
+
+
+
+
+class DailyGoalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyGoals
         fields = '__all__'
 
