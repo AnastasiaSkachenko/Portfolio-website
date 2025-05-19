@@ -40,7 +40,9 @@ def update_daily_goals(user, for_date=None):
         bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
 
     # Step 3: Total calories = BMR + activity
-    total_calories = round(bmr * 1.1 + total_burned )
+    total_calories = round(bmr  + total_burned )
+    if total_burned < 1:
+        total_calories = round(bmr * 1.15)
 
     # Step 4: Adjust for goal
     goal_multipliers = {
@@ -74,7 +76,7 @@ def update_daily_goals(user, for_date=None):
 
     sugar_goal = round((total_calories * 0.10) / 4)
     fiber_goal = round((total_calories / 1000) * 14)
-    caffeine_goal = getattr(user, 'caffeine_mg', 0)
+    caffeine_goal = getattr(user, 'caffeine_d', 400)
 
     # Step 6: Create or update DailyGoals
     daily_goals, created = DailyGoals.objects.get_or_create(user=user, date=for_date)
@@ -88,7 +90,7 @@ def update_daily_goals(user, for_date=None):
     daily_goals.fat_goal = fat_goal
     daily_goals.sugars_goal = sugar_goal
     daily_goals.fiber_goal = fiber_goal
-    daily_goals.caffein_goal = caffeine_goal
+    daily_goals.caffeine_goal = caffeine_goal
 
     daily_goals.save()
 
@@ -149,9 +151,9 @@ def update_user_nutrition(user):
     protein_targets = {
         "fat_loss": 2.2, "active_fat_loss": 2.4,
         "muscle_gain": 2.4, "active_muscle_gain": 2.6,
-        "maintenance": 1.6
+        "maintenance": 1.7
     }
-    protein_per_kg = protein_targets.get(goal, 1.6)
+    protein_per_kg = protein_targets.get(goal, 1.7)
     protein_d = round(weight * protein_per_kg)
     protein_calories = protein_d * 4
 
@@ -176,7 +178,7 @@ def update_user_nutrition(user):
     fiber_d = round((total_calories / 1000) * 14)
 
     # 9. Caffeine (default to 0 or take from user if defined)
-    caffeine_mg = getattr(user, 'caffein_d', 0)
+    caffeine_mg = getattr(user, 'caffein_d', 400)
 
     # Save values to user
     user.calories_d = total_calories

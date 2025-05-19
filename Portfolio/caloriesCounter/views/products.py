@@ -51,6 +51,14 @@ class ProductView(APIView):
             print('image is in files')
             data['image'] = request.FILES['image']
 
+        
+        productExists = Product.objects.filter(name=data.get('name'))
+        dishExists = Dish.objects.filter(name=data.get('name'))
+        if productExists or dishExists:
+            print(productExists[0].name)
+            print(dishExists[0].name, 'dish')
+            return JsonResponse({"error": 'Product or dish with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
 
         for field in ['calories', 'protein', 'carbohydrate', 'fat', 'fiber', 'sugars', 'caffein']:
             if data.get(field) == '':

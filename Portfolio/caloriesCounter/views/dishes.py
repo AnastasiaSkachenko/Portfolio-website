@@ -116,10 +116,16 @@ class DishView(APIView):
             "has_more": paginated_dishes.has_next()
         }, status=status.HTTP_200_OK)
 
-
-
     def post(self, request, format=False):
         data = request.data.dict()
+
+        productExists = Product.objects.filter(name=data.get('name'))
+        dishExists = Dish.objects.filter(name=data.get('name'))
+        if productExists or dishExists:
+            return Response({"error": 'Product or dish with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
         if 'image' in request.FILES:
             print('image is in files')
             data['image'] = request.FILES['image']

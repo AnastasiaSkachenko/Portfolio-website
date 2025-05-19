@@ -66,7 +66,7 @@ def update_popular_dishes():
     print("Popularity update completed.")
 
 @shared_task
-def update_calories_balance():
+def update_calories_balance_old():
     print(' scheduled update calories')
 
     user = User.objects.get(id=2)
@@ -94,6 +94,28 @@ def update_calories_balance():
         fail_silently=False,
     )
 
+def update_calories_balance():
+
+    user = User.objects.get(id=2)
+
+    yesterday = timezone.now().date() - timedelta(days=1)
+    daily_goal = DailyGoals.objects.get(user=user, date=yesterday)
+
+    difference = daily_goal.calories_intake_goal - daily_goal.calories_intake
+    print('balance before', user.balance)
+    user.balance += difference
+    user.save()
+    print("Yesterday you burned:", daily_goal.calories_burned, "You ate: ", daily_goal.calories_intake, "Your new calories balance is: ", user.balance)
+
+
+    
+    send_mail(
+        subject="Updated balance",
+        message=f"My calories balance {user.balance}. Difference is {difference}",
+        from_email=os.getenv('EMAIL_NAME'),
+        recipient_list=["nastaskacenko02@gmail.com"],
+        fail_silently=False,
+    )
 
 
 
