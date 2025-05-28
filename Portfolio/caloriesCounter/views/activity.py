@@ -6,12 +6,12 @@ from backend.authentication import customJWTAuthentication
 from backend.models import ActivityRecord
 from django.db.models import Prefetch
 from backend.serializers import ActivityRecordSerializer 
-from django.utils import timezone
-from caloriesCounter.utils import recalculate_nutrition_for_today
+from django.utils.timezone import  datetime
 from ..update_user_nutritions import update_daily_goals
 
 
 class ActivityRecordView(APIView):
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -26,7 +26,10 @@ class ActivityRecordView(APIView):
         if serializer.is_valid():
             serializer.save()
 
-            update_daily_goals(request.user)
+            print(request.data, 'request data')
+
+            timestamp = datetime.fromisoformat(request.data.get('timestamp'))
+            update_daily_goals(request.user, timestamp)
 
             return Response({"message": "Activity recorded successfully"})
         print(serializer.errors)
@@ -34,11 +37,13 @@ class ActivityRecordView(APIView):
 
     def put(self, request):
         activity = ActivityRecord.objects.get(id=request.data.get('id'))
+        previous_timestamp = activity.timestamp
         serializer = ActivityRecordSerializer(activity, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
 
-            update_daily_goals(request.user)
+            timestamp = datetime.fromisoformat(request.data.get('timestamp'))
+            update_daily_goals(request.user, timestamp, previous_timestamp)
 
             return Response({"message": "Activity record updated successfully"})
         print(serializer.errors)
@@ -48,9 +53,10 @@ class ActivityRecordView(APIView):
     def delete(self, request): 
         id = request.query_params.get('id')
         activity = ActivityRecord.objects.get(id=id)
+        timestamp = activity.timestamp
         activity.delete()
 
-        update_daily_goals(request.user)
+        update_daily_goals(request.user, timestamp)
 
         return Response({'message': 'activity deleted successfully'}, status=status.HTTP_200_OK)
 

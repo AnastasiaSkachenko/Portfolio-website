@@ -11,17 +11,17 @@ celery_app.conf.broker_url = 'redis://localhost:6379/0'
 
 
 celery_app.conf.beat_schedule = {
-    "update-popular-dishes-daily": {
+    "update-popular-dishes-weekly": {
         "task": "caloriesCounter.tasks.update_popular_dishes",
         "schedule": crontab(hour=8, minute=40, day_of_week=1),  
     },
     "update-balance-daily": {
         "task": "caloriesCounter.tasks.update_calories_balance",
-        "schedule": crontab(hour=8, minute=30)
+        "schedule": crontab(hour=1, minute=30)
     },
     "update-nutrition-goals-daily": {
         "task": "caloriesCounter.tasks.update_goals",
-        "schedule": crontab(hour=8, minute=30)
+        "schedule": crontab(hour=1, minute=20)
     },
 
 }

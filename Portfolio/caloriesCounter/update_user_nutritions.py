@@ -1,7 +1,8 @@
 from django.utils import timezone
 from backend.models import ActivityRecord, DailyGoals
 from datetime import timedelta
-from django.db.models import Sum
+from django.db.models import Sum, Q  # import Q for query expressions
+from django.db import models
 from django.utils.timezone import make_aware, datetime, timedelta
 
 
@@ -9,92 +10,131 @@ from django.utils.timezone import make_aware, datetime, timedelta
 
 
 #runs when activity created, updated or deleted
-def update_daily_goals(user, for_date=None):
+def update_daily_goals(user, timestamp, previous_timestamp=None):
     """
-    Update or create a DailyGoals record for a user on a specific date.
-    Recalculates calorie, protein, carb, fat, sugar, fiber, caffeine goals.
+    Update or create DailyGoals for user on relevant dates.
     """
+    print('----------------------/n/n')
 
-    if for_date is None:
-        for_date = timezone.now().date()
 
-    start_of_day = make_aware(datetime.combine(for_date, datetime.min.time()))
-    end_of_day = make_aware(datetime.combine(for_date + timedelta(days=1), datetime.min.time()))
+    def safe_value(value, default, min_value=None, max_value=None):
+        try:
+            val = float(value)
+            if min_value is not None and val < min_value:
+                return default
+            if max_value is not None and val > max_value:
+                return default
+            return val
+        except (TypeError, ValueError):
+            return default
 
-    records = ActivityRecord.objects.filter(user=user, timestamp__gte=start_of_day, timestamp__lt=end_of_day)
-    print(len(records), 'len records')
-        
-    total_burned = sum([record.calories_burned for record in records]) or 0
+    def bmr_calc(weight, height, age, gender):
+        if gender == "female":
+            return (10 * weight) + (6.25 * height) - (5 * age) - 161
+        else:
+            return (10 * weight) + (6.25 * height) - (5 * age) + 5
 
+    def update_for_date(date):
+        start_of_day = make_aware(datetime.combine(date, datetime.min.time()))
+        end_of_day = make_aware(datetime.combine(date + timedelta(days=1), datetime.min.time()))
+
+        # One query with annotation to reduce DB hits
+        records_qs = ActivityRecord.objects.filter(user=user, timestamp__gte=start_of_day, timestamp__lt=end_of_day)
+        agg = records_qs.aggregate(
+            total_burned_goal=Sum('calories_burned'),
+            total_burned_done=Sum('calories_burned', filter=models.Q(done=True))
+        )
+        total_burned_goal = agg['total_burned_goal'] or 0
+        total_burned = agg['total_burned_done'] or 0
+
+        age = safe_value(user.age, 30, 5, 120)
+        weight = safe_value(user.weight, 70, 20, 500)
+        height = safe_value(user.height, 170, 50, 250)
+        gender = user.gender if user.gender in ("male", "female") else "male"
+        goal = user.goal if user.goal in ("fat_loss", "active_fat_loss", "muscle_gain", "active_muscle_gain", "maintenance") else "maintenance"
+
+        bmr = bmr_calc(weight, height, age, gender)
+
+        total_calories_goal = round(bmr + total_burned_goal) if total_burned_goal >= 1 else round(bmr * 1.15)
+        total_calories = round(bmr + total_burned) if total_burned >= 1 else round(bmr * 1.15)
+
+        goal_multipliers = {
+            "fat_loss": 0.85, "active_fat_loss": 0.75,
+            "muscle_gain": 1.15, "active_muscle_gain": 1.25,
+            "maintenance": 1.0
+        }
+        total_calories = round(total_calories * goal_multipliers.get(goal, 1.0))
+
+        protein_targets = {
+            "fat_loss": 2.2, "active_fat_loss": 2.4,
+            "muscle_gain": 2.4, "active_muscle_gain": 2.6,
+            "maintenance": 1.6
+        }
+        protein_per_kg = protein_targets.get(goal, 1.6)
+        protein_goal = round(weight * protein_per_kg)
+        protein_calories = protein_goal * 4
+
+        fat_ratios = {
+            "fat_loss": 0.25, "active_fat_loss": 0.22,
+            "muscle_gain": 0.22, "active_muscle_gain": 0.22,
+            "maintenance": 0.25
+        }
+        fat_ratio = fat_ratios.get(goal, 0.25)
+        fat_goal = round((total_calories * fat_ratio) / 9)
+        fat_calories = fat_goal * 9
+
+        remaining_calories = max(total_calories - (protein_calories + fat_calories), 0)
+        carbohydrate_goal = round(remaining_calories / 4)
+
+        sugar_goal = round((total_calories * 0.10) / 4)
+        fiber_goal = round((total_calories / 1000) * 14)
+        caffeine_goal = safe_value(getattr(user, 'caffeine_d', 400), 400, 0, 1000)
+
+        print('')
+
+        if isinstance(date, datetime):
+            date = date.date()  # convert to date only
     
-    # Step 2: Calculate BMR
-    age = user.age
-    weight = user.weight
-    height = user.height
-    gender = user.gender
-    goal = user.goal
 
-    if gender == "female":
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161
-    else:
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
+        print('previous timestamp', previous_timestamp)
+        print('date ', date)
+        daily_goals, created = DailyGoals.objects.update_or_create(
+            user=user,
+            date=date,
+            defaults={
+                'calories_burned': total_burned,
+                'calories_burned_goal': total_burned_goal,
+                'calories_intake_goal': total_calories_goal,
+                'protein_goal': protein_goal,
+                'carbohydrate_goal': carbohydrate_goal,
+                'fat_goal': fat_goal,
+                'sugars_goal': sugar_goal,
+                'fiber_goal': fiber_goal,
+                'caffeine_goal': caffeine_goal,
+            }
+        )
+        print(daily_goals.calories_intake_goal, 'daily goal calories intake goal')
+        print(daily_goals.date, 'daily goal date')
 
-    # Step 3: Total calories = BMR + activity
-    total_calories = round(bmr  + total_burned )
-    if total_burned < 1:
-        total_calories = round(bmr * 1.15)
+        if created: 
+            print('daily goals is created')
+        return daily_goals
 
-    # Step 4: Adjust for goal
-    goal_multipliers = {
-        "fat_loss": 0.85, "active_fat_loss": 0.75,
-        "muscle_gain": 1.15, "active_muscle_gain": 1.25,
-        "maintenance": 1.0
-    }
-    total_calories = round(total_calories * goal_multipliers.get(goal, 1.0))
+    if user is None or timestamp is None:
+        raise ValueError("User and timestamp are required")
 
-    # Step 5: Macronutrient splits
-    protein_targets = {
-        "fat_loss": 2.2, "active_fat_loss": 2.4,
-        "muscle_gain": 2.4, "active_muscle_gain": 2.6,
-        "maintenance": 1.6
-    }
-    protein_per_kg = protein_targets.get(goal, 1.6)
-    protein_goal = round(weight * protein_per_kg)
-    protein_calories = protein_goal * 4
+    new_date = timestamp.date()
+    old_date = previous_timestamp.date() if previous_timestamp else None
 
-    fat_ratios = {
-        "fat_loss": 0.25, "active_fat_loss": 0.22,
-        "muscle_gain": 0.22, "active_muscle_gain": 0.22,
-        "maintenance": 0.25
-    }
-    fat_ratio = fat_ratios.get(goal, 0.25)
-    fat_goal = round((total_calories * fat_ratio) / 9)
-    fat_calories = fat_goal * 9
+    update_for_date(new_date)
 
-    remaining_calories = total_calories - (protein_calories + fat_calories)
-    carbohydrate_goal = round(remaining_calories / 4)
 
-    sugar_goal = round((total_calories * 0.10) / 4)
-    fiber_goal = round((total_calories / 1000) * 14)
-    caffeine_goal = getattr(user, 'caffeine_d', 400)
+    print(old_date, 'old date')
+    print(new_date, 'new date')
 
-    # Step 6: Create or update DailyGoals
-    daily_goals, created = DailyGoals.objects.get_or_create(user=user, date=for_date)
+    if old_date and old_date != new_date:
+        update_for_date(old_date)
 
-    daily_goals.calories_burned = total_burned
-    daily_goals.calories_burned_goal = total_burned  # same for now
-    daily_goals.calories_intake_goal = total_calories
-
-    daily_goals.protein_goal = protein_goal
-    daily_goals.carbohydrate_goal = carbohydrate_goal
-    daily_goals.fat_goal = fat_goal
-    daily_goals.sugars_goal = sugar_goal
-    daily_goals.fiber_goal = fiber_goal
-    daily_goals.caffeine_goal = caffeine_goal
-
-    daily_goals.save()
-
-    return daily_goals
 
 
 #runs when user info is updated

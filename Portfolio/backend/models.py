@@ -176,9 +176,6 @@ class DiaryRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', default=2, null=True)
 
 
-
-
-
  
 class ActivityRecord(models.Model):
     ACTIVITY_TYPES = [
@@ -191,7 +188,8 @@ class ActivityRecord(models.Model):
         ('custom', 'Custom activity'),
         ('volleyball', "Volleyball"),
         ('stretching', 'Stretching'),
-        ('jumping', 'Jumping')
+        ('jumping', 'Jumping'),
+        ('home_chores', 'Home chores')
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -202,9 +200,10 @@ class ActivityRecord(models.Model):
     weight_kg = models.FloatField() 
     intensity = models.PositiveIntegerField(default=3)
     calories_burned = models.FloatField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=None, null=True, blank=True)
     name = models.CharField(max_length=150, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    done = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         if not self.calories_burned:
@@ -214,7 +213,7 @@ class ActivityRecord(models.Model):
 
 class DailyGoals(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=None, null=True, blank=True)
     calories_burned = models.PositiveIntegerField(default=0)    
     calories_burned_goal = models.PositiveIntegerField(default=0)
     protein = models.PositiveIntegerField(default=0)    
@@ -231,3 +230,6 @@ class DailyGoals(models.Model):
     caffeine_goal = models.PositiveIntegerField(default=0)
     calories_intake = models.PositiveIntegerField(default=0)
     calories_intake_goal = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'date')

@@ -94,6 +94,8 @@ def update_calories_balance_old():
         fail_silently=False,
     )
 
+
+@shared_task
 def update_calories_balance():
 
     user = User.objects.get(id=2)
@@ -101,6 +103,14 @@ def update_calories_balance():
     yesterday = timezone.now().date() - timedelta(days=1)
     daily_goal = DailyGoals.objects.get(user=user, date=yesterday)
 
+    yesterday_diary = timezone.now() - timedelta(days=1)
+    yesterday_start = yesterday_diary.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_end = yesterday_diary.replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    records = DiaryRecord.objects.filter(user=user,date__range=[yesterday_start, yesterday_end])
+
+    daily_goal.calories_intake = records.aggregate(Sum('calories'))['calories__sum'] or 0
+    daily_goal.save()
     difference = daily_goal.calories_intake_goal - daily_goal.calories_intake
     print('balance before', user.balance)
     user.balance += difference
@@ -122,7 +132,6 @@ def update_calories_balance():
 
 
 @shared_task
-
 def update_goals():
     user = User.objects.get(id=2)
 
@@ -141,9 +150,9 @@ def update_goals():
     totals = diary_records.aggregate(
         total_calories=Sum('calories'),
         total_protein=Sum('protein'),
-        total_carbs=Sum('carbohydrates'),
+        total_carbs=Sum('carbohydrate'),
         total_fats=Sum('fat'),
-        total_sugar=Sum('sugar'),
+        total_sugar=Sum('sugars'),
         total_fiber=Sum('fiber'),
         total_caffeine=Sum('caffein'),
     )
@@ -161,13 +170,13 @@ def update_goals():
 
         # 3. Update DailyGoals entry for that date
     daily_goals, _ = DailyGoals.objects.get_or_create(user=user, date=yesterday.date())
-    daily_goals.calories = consumed['calories']
+    daily_goals.calories_intake = consumed['calories']
     daily_goals.protein = consumed['protein']
-    daily_goals.carbohydrates = consumed['carbohydrates']
-    daily_goals.fats = consumed['fats']
+    daily_goals.carbohydrate = consumed['carbohydrates']
+    daily_goals.fat = consumed['fats']
     daily_goals.sugars = consumed['sugars']
     daily_goals.fiber = consumed['fiber']
-    daily_goals.caffein = consumed['caffein']
+    daily_goals.caffeine = consumed['caffein']
     daily_goals.save()
 
     # 4. Send email with summary
@@ -176,13 +185,13 @@ def update_goals():
         message=(
             f"Hi {user.name},\n\n"
             f"Here's a summary of your nutrition intake for {yesterday.date()}:\n\n"
-            f"🔹 Calories: {consumed['calories']} kcal / Goal: {user.calories_d} kcal\n"
-            f"🔹 Protein: {consumed['protein']} g / Goal: {user.protein_d} g\n"
-            f"🔹 Carbohydrates: {consumed['carbohydrates']} g / Goal: {user.carbohydrate_d} g\n"
-            f"🔹 Fats: {consumed['fats']} g / Goal: {user.fat_d} g\n"
-            f"🔹 Sugars: {consumed['sugars']} g / Goal: {user.sugars_d} g\n"
-            f"🔹 Fiber: {consumed['fiber']} g / Goal: {user.fiber_d} g\n"
-            f"🔹 Caffeine: {consumed['caffein']} mg / Goal: {user.caffein_d} mg\n\n"
+            f"🔹 Calories: {consumed['calories']} kcal / Goal: {daily_goals.calories_intake_goal} kcal\n"
+            f"🔹 Protein: {consumed['protein']} g / Goal: {daily_goals.protein_goal} g\n"
+            f"🔹 Carbohydrates: {consumed['carbohydrates']} g / Goal: {daily_goals.carbohydrate_goal} g\n"
+            f"🔹 Fats: {consumed['fats']} g / Goal: {daily_goals.fat_goal} g\n"
+            f"🔹 Sugars: {consumed['sugars']} g / Goal: {daily_goals.sugars_goal} g\n"
+            f"🔹 Fiber: {consumed['fiber']} g / Goal: {daily_goals.fiber_goal} g\n"
+            f"🔹 Caffeine: {consumed['caffein']} mg / Goal: {daily_goals.caffeine_goal} mg\n\n"
             f"Keep up the good work! 🥦💪"
         ),
         from_email=os.getenv('EMAIL_NAME'),

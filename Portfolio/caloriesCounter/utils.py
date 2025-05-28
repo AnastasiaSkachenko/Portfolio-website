@@ -39,10 +39,16 @@ def calculate_calories_from_activity_record(record):
 
     # Walking (Steps) special case: 0.04 is an approximation for step-based calorie burning
     if activity_type == 'walk_steps' and steps:
-        # Average calories per step (tweak this if needed)
-        calories_per_step = 0.035
+        # Base values
+        calories_per_step = 0.035  # base for moderate intensity
         base_weight = 70
-        return round(steps * calories_per_step * (weight_kg / base_weight), 0)
+
+        # Normalize intensity (e.g., 1.0 for intensity=1, 1.5 for intensity=5)
+        # Adjust the scaling factor to tune the influence of intensity
+        intensity_multiplier = 1 + (intensity - 3) * 0.2  # ranges from 0.6 to 1.4
+
+        # Apply intensity and weight scaling
+        return round(steps * calories_per_step * intensity_multiplier * (weight_kg / base_weight), 0)
 
     # Walking (Time) special case: burn calories based on MET value and duration
     if activity_type == 'walk_time' and duration_minutes:
@@ -54,6 +60,11 @@ def calculate_calories_from_activity_record(record):
         if activity_type == 'interval_run':
             met *= 1.2  # Boost MET value for interval runs
         return round(met * weight_kg * duration_hours, 0)
+    
+    if activity_type == 'home_chores' and duration_minutes:
+        duration_hours = duration_minutes / 60
+        return round(met * weight_kg * duration_hours, 0)
+
 
     # If duration is missing but distance exists, calculate based on distance and MET value
     if duration_minutes == 0 and distance_km:

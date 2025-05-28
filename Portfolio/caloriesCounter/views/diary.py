@@ -15,7 +15,6 @@ class DailyGoalView(APIView):
     def get(self, request):  
         records = DailyGoals.objects.filter(user=request.user.id) # Get all records from the table
         serializer = DailyGoalSerializer(records, many=True)  # Serialize multiple records
-        print(serializer.data)
         return Response({'goals':serializer.data}, status=status.HTTP_200_OK)
 
 
