@@ -136,6 +136,7 @@ class DishView(APIView):
             dish = serializer.save()
             return Response({"id": dish.id}, status=status.HTTP_201_CREATED)
 
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, format=False):
@@ -185,6 +186,7 @@ class IsNameUnique(APIView):
 
     def get(self, request):
         name = request.query_params.get('name')
+        print('name', name)
         editing_name = request.query_params.get('editingName')
 
         if not name:

@@ -7,7 +7,27 @@ from rest_framework import  status
 from django.shortcuts import get_object_or_404 
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
- 
+from django.utils.dateparse import parse_datetime 
+
+
+
+class GetAllProducts(APIView): 
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            products = Product.objects.all().order_by('-id')
+            products_data = ProductSerializer(products, many=True).data
+
+
+            return Response({"products":products_data}, status=200)
+        except:
+            return Response({"error": 'Failed to fetch products'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+def ping(request):
+    return JsonResponse({"status": "ok"})
 
 
 class ProductView(APIView): 
@@ -64,6 +84,7 @@ class ProductView(APIView):
             if data.get(field) == '':
                 data[field] = 0
 
+        print(data, 'data')
 
         serializer = ProductSerializer(data=data)
         if serializer.is_valid():
@@ -103,7 +124,7 @@ class ProductView(APIView):
             data['image'] = request.FILES['image']
 
 
-
+        print(data, 'data')
 
         serializer = ProductSerializer(product, data=data, partial=True)
 
@@ -143,6 +164,27 @@ class GetProductNames(APIView):
         product_names = Product.objects.values_list('name', flat=True)  # Returns a flat list
         return Response({"products": product_names}, status=200)
 
+
+
+
+class GetUpdatedProducts(APIView):
+    permission_classes = []  
+
+    def get(self, request):
+        last_synced = request.query_params.get('last_synced')
+        if not last_synced:
+            return Response({"error": "last_synced query param is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # parse the string datetime to Python datetime object
+        last_synced_dt = parse_datetime(last_synced)
+        if not last_synced_dt:
+            return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
+
+        products = Product.objects.filter(last_updated__gt=last_synced_dt)
+
+        # Assuming you have a ProductSerializer
+        serializer = ProductSerializer(products, many=True)
+        return Response({"products": serializer.data}, status=status.HTTP_200_OK)
 
 class CheckProductExistsView(APIView):
     permission_classes = [AllowAny]  # Publicly accessible

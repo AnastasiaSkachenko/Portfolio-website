@@ -1,14 +1,18 @@
 from django.urls import path 
 from .views.diary import  DiaryView, DailyGoalView
 from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView, CustomTokenObtainPairView, CustomTokenRefreshView, SendVerificationCodeView, VerifyCodeView, ResetPasswordView, TestingHere
-from .views.products import ProductView,  GetProductNames, CheckProductExistsView
+from .views.products import ProductView,  GetProductNames, CheckProductExistsView, GetUpdatedProducts, GetAllProducts, ping
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite
 from .views.ingredients import  IngredientView, getIngredientsInDish
 from .views.activity import ActivityRecordView
 
 
 
+
 urlpatterns = [
+    path("ping/", ping),
+
+
     path('dailyGoals/', DailyGoalView.as_view()),
 
 
@@ -17,6 +21,8 @@ urlpatterns = [
     path('test/', TestingHere.as_view()),
 
     path('products/', ProductView.as_view(), name='productCreateGet'), 
+    path('products-all/', GetAllProducts.as_view(), name='getAllProducts'), 
+    path('products-updated/', GetUpdatedProducts.as_view(), name='getUpdatedProducts'), 
 
     path('ingredient/', IngredientView.as_view(), name='ingredientCreateGet'), 
     path('ingredient/<int:id>/', IngredientView.as_view(), name='ingredientEditDelete'), 

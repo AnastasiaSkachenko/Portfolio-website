@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from .managers import UserManager
 from caloriesCounter.utils import calculate_calories_from_activity_record
-
+import uuid
 
 def upload_to(instance, filename): 
     return 'user/{filename}'.format(filename=filename)
@@ -86,8 +86,9 @@ class Skill(models.Model):
     image = models.CharField(max_length=180)
     experience = models.IntegerField()
 
-class Product(models.Model):
-    name = models.CharField(max_length=180)
+class ProductOld(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, null=True)  # Step 1
+    name = models.CharField(max_length=180, unique=True)
     image = models.ImageField(_('Image'), upload_to=upload_products_to ,default='product.jpeg')
     calories =models.IntegerField()
     protein = models.DecimalField(max_digits=10, decimal_places=1)
@@ -97,6 +98,31 @@ class Product(models.Model):
     sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     caffein = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productAuthor', default=2)
+    last_updated = models.DateTimeField(auto_now=True)
+
+
+class Product(models.Model):
+    id = models.UUIDField(primary_key=True, default=None, editable=True)
+    name = models.CharField(max_length=180, unique=True)
+    image = models.ImageField(_('Image'), upload_to=upload_products_to ,default='product.jpeg')
+    calories =models.IntegerField()
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbs = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1)
+    fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productUser', default=2)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.id = uuid.uuid4()
+        super().save(*args, **kwargs)
+
+
+
+
 
 class Dish(models.Model):
     TYPE_CHOICES = [
@@ -124,7 +150,8 @@ class Dish(models.Model):
 
     drink = models.BooleanField(default=False)
     weight = models.IntegerField(default=0)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='dish', null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_old = models.ForeignKey(ProductOld, on_delete=models.CASCADE, related_name='dish', null=True, blank=True)
     portion = models.IntegerField(default=100, null=True, blank=True)
     portions = models.IntegerField(default=1, null=True, blank=True)
     description = models.TextField(default='', blank=True)
@@ -144,7 +171,8 @@ class Dish(models.Model):
 
 
 class Ingredient(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='ingredientsProduct', null=True)
+    product_old = models.ForeignKey(ProductOld, on_delete=models.SET_NULL, related_name='ingredientsProduct', null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     calories = models.IntegerField()
     protein = models.DecimalField(max_digits=10, decimal_places=1)
     carbohydrate = models.DecimalField(max_digits=10, decimal_places=1)
