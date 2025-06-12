@@ -33,6 +33,12 @@ DEBUG = os.getenv('DEBUG', 'True')
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,192.168.0.20,192.168.0.16,0.0.0.0').split(',')
 
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-app-source',
+]
+
  
 CORS_ALLOW_ALL_ORIGINS = True
 

@@ -2,8 +2,8 @@ from django.urls import path
 from .views.diary import  DiaryView, DailyGoalView
 from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView, CustomTokenObtainPairView, CustomTokenRefreshView, SendVerificationCodeView, VerifyCodeView, ResetPasswordView, TestingHere
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView, GetUpdatedProducts, GetAllProducts, ping
-from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite
-from .views.ingredients import  IngredientView, getIngredientsInDish
+from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite, GetAllDishes, GetUpdatedDishes
+from .views.ingredients import  IngredientView, getIngredientsInDish, GetAllIngredients, GetUpdatedIngredients
 from .views.activity import ActivityRecordView
 
 
@@ -25,9 +25,17 @@ urlpatterns = [
     path('products-updated/', GetUpdatedProducts.as_view(), name='getUpdatedProducts'), 
 
     path('ingredient/', IngredientView.as_view(), name='ingredientCreateGet'), 
-    path('ingredient/<int:id>/', IngredientView.as_view(), name='ingredientEditDelete'), 
+    path('ingredient/<str:id>', IngredientView.as_view(), name='ingredientEditDelete'), 
+
+    path('ingredients-all/', GetAllIngredients.as_view(), name='getAllIngredients'), 
+    path('ingredients-updated/', GetUpdatedIngredients.as_view(), name='getUpdatedIngredients'), 
+
 
     path('dishes/', DishView.as_view(), name='dishCreateGet'), 
+
+    path('dishes-all/', GetAllDishes.as_view(), name='getAllDishes'), 
+    path('dishes-updated/', GetUpdatedDishes.as_view(), name='getUpdatedDishes'), 
+
     path('dishIngredients/', getIngredientsInDish, name='getDishIngredients'),
     path('get-dish-by-id/<int:id>', getDishById, name='getDishByID'),
     path("dish/<int:dish_id>/favorite/", ToggleFavorite.as_view(), name="toggle_favorite"),

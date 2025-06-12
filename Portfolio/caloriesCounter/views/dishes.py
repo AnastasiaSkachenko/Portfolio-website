@@ -13,6 +13,44 @@ from backend.authentication import customJWTAuthentication
 from django.http import HttpResponseForbidden
 from decimal import Decimal, ROUND_HALF_UP
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from django.utils.dateparse import parse_datetime 
+
+
+class GetAllDishes(APIView): 
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            dishes = Dish.objects.filter(is_deleted=False).order_by('-id')
+            dishes_data = DishSerializer(dishes, many=True).data
+            return Response({"dishes": dishes_data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Failed to fetch dishes"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class GetUpdatedDishes(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        last_synced = request.query_params.get('last_synced')
+        if not last_synced:
+            return Response({"error": "last_synced query param is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        last_synced_dt = parse_datetime(last_synced)
+        if not last_synced_dt:
+            return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch updated dishes and deleted ones
+        dishes = Dish.objects.filter(last_updated__gt=last_synced_dt)
+        deleted_dishes = list(Dish.objects.filter(is_deleted=True).values_list('id', flat=True))
+
+        serializer = DishSerializer(dishes, many=True)
+        return Response({
+            "dishes": serializer.data,
+            "deleted_dishes": deleted_dishes
+        }, status=status.HTTP_200_OK)
+
 
 
 
@@ -23,7 +61,7 @@ class DishView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     def get(self, request):
         user = request.user  # Get the current user
-        dishes = Dish.objects.all().order_by('-id')
+        dishes = Dish.objects.filter(is_deleted=False).order_by('-last_updated')
 
         # Filtering options
         query = request.query_params.get('query', None)
@@ -63,7 +101,7 @@ class DishView(APIView):
             dishes = dishes.filter(protein_100__gt=15)
 
         if 'low_carbs' in filters:
-            dishes = dishes.filter(carbohydrate_100__lt=10)
+            dishes = dishes.filter(carbs_100__lt=10)
 
         if 'low_fat' in filters:
             dishes = dishes.filter(fat_100__lt=3)
@@ -95,21 +133,28 @@ class DishView(APIView):
                 dish['favorite'] = False
 
         # Optimize ingredient fetching with bulk queries
-        dish_ids = [dish['id'] for dish in dish_data]
-        ingredients = Ingredient.objects.filter(dish__id__in=dish_ids).select_related('product')
+        dish_ids = [str(dish['id']) for dish in dish_data]
+
+        ingredients = Ingredient.objects.filter(dish__id__in=dish_ids, is_deleted=False).select_related('product')
         ingredient_dict = {}
 
         for ingredient in ingredients:
             ingredient_data = IngredientSerializer(ingredient).data
             if ingredient.product:
                 ingredient_data['name'] = ingredient.product.name
-            if ingredient.dish_id not in ingredient_dict:
-                ingredient_dict[ingredient.dish_id] = []
-            ingredient_dict[ingredient.dish_id].append(ingredient_data)
 
-        # Attach ingredients to each dish
+            dish_id_str = str(ingredient.dish.id)  # Normalize UUID to string
+            if dish_id_str not in ingredient_dict:
+                ingredient_dict[dish_id_str] = []
+
+            ingredient_dict[dish_id_str].append(ingredient_data)
+
+        # Attach ingredients using string IDs
         for dish in dish_data:
-            dish['ingredients'] = ingredient_dict.get(dish['id'], [])
+            dish['ingredients'] = ingredient_dict.get(str(dish['id']), [])
+
+        
+
 
         return Response({
             "dishes": dish_data,
@@ -118,6 +163,7 @@ class DishView(APIView):
 
     def post(self, request, format=False):
         data = request.data.dict()
+        print(data)
 
         productExists = Product.objects.filter(name=data.get('name'))
         dishExists = Dish.objects.filter(name=data.get('name'))
@@ -167,7 +213,9 @@ class DishView(APIView):
 
         try:
             dish = Dish.objects.get(id=dish_id)
-            dish.delete()
+            dish.is_deleted = True
+            dish.save()
+
             return Response({"message": "Dish deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except Dish.DoesNotExist:
             return Response({"error": "Dish not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -186,7 +234,6 @@ class IsNameUnique(APIView):
 
     def get(self, request):
         name = request.query_params.get('name')
-        print('name', name)
         editing_name = request.query_params.get('editingName')
 
         if not name:
@@ -196,6 +243,7 @@ class IsNameUnique(APIView):
         exists_product = Product.objects.filter(name__iexact=name).exclude(name__iexact=editing_name).exists()
         exists_dish = Dish.objects.filter(name__iexact=name).exclude(name__iexact=editing_name).exists()
 
+        print(exists_dish, exists_product)
         return Response({"exists_product": exists_product, "exists_dish": exists_dish}, status=200)
 
 
@@ -238,7 +286,7 @@ def recalculate_dish(dish_id):
         total_weight=Sum('weight'),
         total_calories=Sum('calories'),
         total_protein=Sum('protein'),
-        total_carbohydrate=Sum('carbohydrate'),
+        total_carbs=Sum('carbs'),
         total_fat=Sum('fat'),
     )
 
@@ -249,7 +297,7 @@ def recalculate_dish(dish_id):
     dish.weight = round_decimal(aggregated_data['total_weight'])
     dish.calories = round_decimal(aggregated_data['total_calories'])
     dish.protein = round_decimal(aggregated_data['total_protein'])
-    dish.carbohydrate = round_decimal(aggregated_data['total_carbohydrate'])
+    dish.carbs = round_decimal(aggregated_data['total_carbs'])
     dish.fat = round_decimal(aggregated_data['total_fat'])
     dish.save()
 
@@ -258,12 +306,12 @@ def recalculate_dish(dish_id):
     if base_weight > 0:
         dish.calories_100 = round_decimal(dish.calories / base_weight * 100)
         dish.protein_100 = round_decimal(dish.protein / base_weight * 100)
-        dish.carbohydrate_100 = round_decimal(dish.carbohydrate / base_weight * 100)
+        dish.carbs_100 = round_decimal(dish.carbs / base_weight * 100)
         dish.fat_100 = round_decimal(dish.fat / base_weight * 100)
     else:
         dish.calories_100 = Decimal(0)
         dish.protein_100 = Decimal(0)
-        dish.carbohydrate_100 = Decimal(0)
+        dish.carbs_100 = Decimal(0)
         dish.fat_100 = Decimal(0)
 
     dish.save()

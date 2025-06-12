@@ -114,6 +114,7 @@ class Product(models.Model):
     caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='productUser', default=2)
     last_updated = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -124,7 +125,7 @@ class Product(models.Model):
 
 
 
-class Dish(models.Model):
+class DishOld(models.Model):
     TYPE_CHOICES = [
         ('pre_made', 'pre-made'),
         ('custom', 'custom'),
@@ -170,7 +171,57 @@ class Dish(models.Model):
         super().save(*args, **kwargs)
 
 
-class Ingredient(models.Model):
+class Dish(models.Model):
+    TYPE_CHOICES = [
+        ('pre_made', 'pre-made'),
+        ('custom', 'custom'),
+    ] 
+
+    id = models.UUIDField(primary_key=True, default=None, editable=True)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='custom')
+    name = models.CharField(max_length=180, unique=True)
+    image = models.ImageField(_('Image'), upload_to=upload_dishes_to, blank=True)
+    calories = models.IntegerField()
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbs = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+
+    calories_100 = models.IntegerField(default=0)
+    protein_100 = models.DecimalField(max_digits=10, decimal_places=1)
+    carbs_100 = models.DecimalField(max_digits=10, decimal_places=1)
+    fat_100 = models.DecimalField(max_digits=10, decimal_places=1)
+    fiber_100 = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    sugars_100 = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine_100 = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+
+    drink = models.BooleanField(default=False)
+    weight = models.IntegerField(default=0)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    product_old = models.ForeignKey(ProductOld, on_delete=models.CASCADE, related_name='old_product', null=True, blank=True)
+    portion = models.IntegerField(default=100, null=True, blank=True)
+    portions = models.IntegerField(default=1, null=True, blank=True)
+    description = models.TextField(default='', blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='dishUser', default=2, null=True)
+    weight_of_ready_product = models.IntegerField(default=0, null=True, blank=True)
+    is_popular = models.BooleanField(default=False)
+ 
+    is_deleted = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.image:
+            self.image = 'drink.jpeg' if self.drink else 'dish.jpeg'
+
+        if self.weight_of_ready_product is None:  # Set default only if not provided
+            self.weight_of_ready_product = self.weight
+        
+        super().save(*args, **kwargs)
+
+
+class IngredientOld(models.Model):
     product_old = models.ForeignKey(ProductOld, on_delete=models.SET_NULL, related_name='ingredientsProduct', null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     calories = models.IntegerField()
@@ -179,25 +230,47 @@ class Ingredient(models.Model):
     fat = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
-    caffein = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
 
-    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ingredientsDish')
+    dish_old = models.ForeignKey(DishOld, on_delete=models.CASCADE, related_name='ingredientsDishOld')
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ingredientsOldDish', null=True)
     weight = models.IntegerField(default=0)
     name = models.CharField(default='')
 
 
 
+class Ingredient(models.Model):
+    id = models.UUIDField(primary_key=True, default=None, editable=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    calories = models.IntegerField()
+    protein = models.DecimalField(max_digits=10, decimal_places=1)
+    carbs = models.DecimalField(max_digits=10, decimal_places=1)
+    fat = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    dish = models.ForeignKey(Dish, on_delete=models.CASCADE, related_name='ingredientsDish', null=True)
+    weight = models.IntegerField(default=0)
+    name = models.CharField(default='')
+    is_deleted = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True)
+
+
+
+
+
 class DiaryRecord(models.Model):
     name = models.CharField(max_length=150, default='food')
-    dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDish', null=True, blank=True)
+    dish_old = models.ForeignKey(DishOld, on_delete=models.SET_NULL, related_name='diaryDish', null=True, blank=True)
+    dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDishUUID', null=True, blank=True)
     date = models.DateTimeField(null=True, blank=True)
     calories = models.IntegerField(null=True)
     protein = models.DecimalField(max_digits=10, decimal_places=1, null=True)
-    carbohydrate = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    carbs = models.DecimalField(max_digits=10, decimal_places=1, null=True)
     fat = models.DecimalField(max_digits=10, decimal_places=1, null=True)
     fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
-    caffein = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
 
     weight = models.IntegerField(default=0)
     portions = models.IntegerField(default=0)
