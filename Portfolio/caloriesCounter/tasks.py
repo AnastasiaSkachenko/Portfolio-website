@@ -7,8 +7,7 @@ from django.core.mail import send_mail
 import os
 from django.utils import timezone
 from django.db.models import Sum  
-from .utils import recalculate_nutrition_for_today
-
+import uuid
 
 
 @shared_task
@@ -150,7 +149,7 @@ def update_goals():
     totals = diary_records.aggregate(
         total_calories=Sum('calories'),
         total_protein=Sum('protein'),
-        total_carbs=Sum('carbohydrate'),
+        total_carbs=Sum('carbs'),
         total_fats=Sum('fat'),
         total_sugar=Sum('sugars'),
         total_fiber=Sum('fiber'),
@@ -161,7 +160,7 @@ def update_goals():
     consumed = {
         'calories': totals['total_calories'] or 0,
         'protein': totals['total_protein'] or 0,
-        'carbohydrates': totals['total_carbs'] or 0,
+        'carbs': totals['total_carbs'] or 0,
         'fats': totals['total_fats'] or 0,
         'sugars': totals['total_sugar'] or 0,
         'fiber': totals['total_fiber'] or 0,
@@ -169,10 +168,10 @@ def update_goals():
     }
 
         # 3. Update DailyGoals entry for that date
-    daily_goals, _ = DailyGoals.objects.get_or_create(user=user, date=yesterday.date())
+    daily_goals, _ = DailyGoals.objects.get_or_create(user=user, date=yesterday.date(), id=uuid.uuid4())
     daily_goals.calories_intake = consumed['calories']
     daily_goals.protein = consumed['protein']
-    daily_goals.carbohydrate = consumed['carbohydrates']
+    daily_goals.carbohydrate = consumed['carbs']
     daily_goals.fat = consumed['fats']
     daily_goals.sugars = consumed['sugars']
     daily_goals.fiber = consumed['fiber']
@@ -187,7 +186,7 @@ def update_goals():
             f"Here's a summary of your nutrition intake for {yesterday.date()}:\n\n"
             f"🔹 Calories: {consumed['calories']} kcal / Goal: {daily_goals.calories_intake_goal} kcal\n"
             f"🔹 Protein: {consumed['protein']} g / Goal: {daily_goals.protein_goal} g\n"
-            f"🔹 Carbohydrates: {consumed['carbohydrates']} g / Goal: {daily_goals.carbohydrate_goal} g\n"
+            f"🔹 Carbohydrates: {consumed['carbs']} g / Goal: {daily_goals.carbs_goal} g\n"
             f"🔹 Fats: {consumed['fats']} g / Goal: {daily_goals.fat_goal} g\n"
             f"🔹 Sugars: {consumed['sugars']} g / Goal: {daily_goals.sugars_goal} g\n"
             f"🔹 Fiber: {consumed['fiber']} g / Goal: {daily_goals.fiber_goal} g\n"

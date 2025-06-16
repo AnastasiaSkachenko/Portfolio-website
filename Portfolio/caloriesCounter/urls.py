@@ -1,5 +1,5 @@
 from django.urls import path 
-from .views.diary import  DiaryView, DailyGoalView
+from .views.diary import  DiaryView, DailyGoalView, GetAllDiaryRecords, GetUpdatedDiaryRecords
 from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView, CustomTokenObtainPairView, CustomTokenRefreshView, SendVerificationCodeView, VerifyCodeView, ResetPasswordView, TestingHere
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView, GetUpdatedProducts, GetAllProducts, ping
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite, GetAllDishes, GetUpdatedDishes
@@ -41,6 +41,9 @@ urlpatterns = [
     path("dish/<int:dish_id>/favorite/", ToggleFavorite.as_view(), name="toggle_favorite"),
 
     path('diary-record/', DiaryView.as_view(), name='recordCreateGet'), 
+    path('diary-record-all/', GetAllDiaryRecords.as_view(), name='getAllDailyRecords'), 
+    path('diary-record-updated/', GetUpdatedDiaryRecords.as_view(), name='getUpdatedDiaryRecords'), 
+
 
     path("register/", RegisterView.as_view(), name="register"),
     path("logout/", LogoutView.as_view(), name="logout"),

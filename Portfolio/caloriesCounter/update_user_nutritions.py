@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db.models import Sum, Q  # import Q for query expressions
 from django.db import models
 from django.utils.timezone import make_aware, datetime, timedelta
-
+import uuid
 
 
 
@@ -55,7 +55,7 @@ def update_daily_goals(user, timestamp, previous_timestamp=None):
 
         bmr = bmr_calc(weight, height, age, gender)
 
-        total_calories_goal = round(bmr + total_burned_goal) if total_burned_goal >= 1 else round(bmr * 1.15)
+        total_calories_goal = round(round(bmr * 1.05) + total_burned_goal) if total_burned_goal >= 1 else round(bmr * 1.15)
         total_calories = round(bmr + total_burned) if total_burned >= 1 else round(bmr * 1.15)
 
         goal_multipliers = {

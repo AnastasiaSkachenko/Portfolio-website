@@ -6,6 +6,46 @@ from rest_framework import  status
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 from backend.authentication import customJWTAuthentication
+from django.utils.dateparse import parse_datetime
+
+
+class GetAllDiaryRecords(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            records = DiaryRecord.objects.filter(is_deleted=False).order_by('-id')
+            records_data = DiarySerializer(records, many=True).data
+            return Response({"diary_records": records_data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Failed to fetch diary records"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetUpdatedDiaryRecords(APIView):
+    permission_classes = []
+
+    def get(self, request):
+        last_synced = request.query_params.get('last_synced')
+        if not last_synced:
+            return Response({"error": "last_synced query param is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        last_synced_dt = parse_datetime(last_synced)
+        if not last_synced_dt:
+            return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Updated and deleted diary records
+        updated_records = DiaryRecord.objects.filter(last_updated__gt=last_synced_dt)
+        deleted_record_ids = list(
+            DiaryRecord.objects.filter(is_deleted=True).values_list('id', flat=True)
+        )
+
+        serializer = DiarySerializer(updated_records, many=True)
+        return Response({
+            "diary_records": serializer.data,
+            "deleted_records": deleted_record_ids
+        }, status=status.HTTP_200_OK)
+
+
 
 
 class DailyGoalView(APIView): 
@@ -29,6 +69,7 @@ class DiaryView(APIView):
  
     def post(self, request):
         data = request.data.copy()  
+        print(data, 'data \n\n\n\n\n\n')
         data['date'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
       
         serializer = DiarySerializer(data=data)

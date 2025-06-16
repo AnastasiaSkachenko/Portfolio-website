@@ -258,8 +258,7 @@ class Ingredient(models.Model):
 
 
 
-
-class DiaryRecord(models.Model):
+class DiaryRecordOLD(models.Model):
     name = models.CharField(max_length=150, default='food')
     dish_old = models.ForeignKey(DishOld, on_delete=models.SET_NULL, related_name='diaryDish', null=True, blank=True)
     dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDishUUID', null=True, blank=True)
@@ -276,9 +275,27 @@ class DiaryRecord(models.Model):
     portions = models.IntegerField(default=0)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user', default=2, null=True)
 
+class DiaryRecord(models.Model):
+    id = models.UUIDField(primary_key=True, default=None, editable=True)
+    name = models.CharField(max_length=150, default='food')
+    dish = models.ForeignKey(Dish, on_delete=models.SET_NULL, related_name='diaryDishUUIDOwn', null=True, blank=True)
+    date = models.DateTimeField(null=True, blank=True)
+    calories = models.IntegerField(null=True)
+    protein = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    carbs = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    fat = models.DecimalField(max_digits=10, decimal_places=1, null=True)
+    fiber = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    sugars = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    weight = models.IntegerField(default=0)
+    portions = models.IntegerField(default=0)
+    is_deleted= models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userUUID', default=2, null=True)
+
 
  
-class ActivityRecord(models.Model):
+class ActivityRecordOLD(models.Model):
     ACTIVITY_TYPES = [
         ('workout', 'Workout'),
         ('tabata', 'Tabata'),
@@ -312,7 +329,7 @@ class ActivityRecord(models.Model):
         super().save(*args, **kwargs)
 
 
-class DailyGoals(models.Model):
+class DailyGoalsOLD(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=None, null=True, blank=True)
     calories_burned = models.PositiveIntegerField(default=0)    
@@ -334,3 +351,67 @@ class DailyGoals(models.Model):
 
     class Meta:
         unique_together = ('user', 'date')
+
+
+
+
+class ActivityRecord(models.Model):
+    ACTIVITY_TYPES = [
+        ('workout', 'Workout'),
+        ('tabata', 'Tabata'),
+        ('run', 'Run'),
+        ('walk_time', 'Walk (Time)'),
+        ('walk_steps', 'Walk (Steps)'),
+        ('interval_run', 'Interval Run'),
+        ('custom', 'Custom activity'),
+        ('volleyball', "Volleyball"),
+        ('stretching', 'Stretching'),
+        ('jumping', 'Jumping'),
+        ('home_chores', 'Home chores')
+    ]
+
+    id = models.UUIDField(primary_key=True, default=None, editable=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES, default='walk_time')
+    duration_minutes = models.FloatField(null=True, blank=True)
+    steps = models.PositiveIntegerField(null=True, blank=True)
+    distance_km = models.FloatField(null=True, blank=True)
+    weight_kg = models.FloatField() 
+    intensity = models.PositiveIntegerField(default=3)
+    calories_burned = models.FloatField()
+    timestamp = models.DateTimeField(default=None, null=True, blank=True)
+    name = models.CharField(max_length=150, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    done = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.calories_burned:
+            self.calories_burned = calculate_calories_from_activity_record(self)
+        super().save(*args, **kwargs)
+
+
+class DailyGoals(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(default=None, null=True, blank=True)
+    calories_burned = models.PositiveIntegerField(default=0)    
+    calories_burned_goal = models.PositiveIntegerField(default=0)
+    protein = models.PositiveIntegerField(default=0)    
+    protein_goal = models.PositiveIntegerField(default=0)
+    carbohydrate = models.PositiveIntegerField(default=0)    
+    carbohydrate_goal = models.PositiveIntegerField(default=0)
+    fat = models.PositiveIntegerField(default=0)    
+    fat_goal = models.PositiveIntegerField(default=0)
+    fiber = models.PositiveIntegerField(default=0)
+    fiber_goal = models.PositiveIntegerField(default=0)
+    sugars = models.PositiveIntegerField(default=0)
+    sugars_goal = models.PositiveIntegerField(default=0)
+    caffeine = models.PositiveIntegerField(default=0)
+    caffeine_goal = models.PositiveIntegerField(default=0)
+    calories_intake = models.PositiveIntegerField(default=0)
+    calories_intake_goal = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'date')
+
+
