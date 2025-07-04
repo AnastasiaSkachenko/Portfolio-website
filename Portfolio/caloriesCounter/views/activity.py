@@ -8,6 +8,44 @@ from django.db.models import Prefetch
 from backend.serializers import ActivityRecordSerializer 
 from django.utils.timezone import  datetime
 from ..update_user_nutritions import update_daily_goals
+from django.utils.dateparse import parse_datetime 
+
+
+
+class GetAllActivities(APIView): 
+    permission_classes = []
+
+    def get(self, request):
+        try:
+            activities = ActivityRecord.objects.filter(is_deleted=False).order_by('-timestamp')
+            activities_data = ActivityRecordSerializer(activities, many=True).data
+
+
+            return Response({"activities":activities_data}, status=200)
+        except:
+            return Response({"error": 'Failed to fetch activities'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class GetUpdatedActivities(APIView):
+    permission_classes = []  
+
+    def get(self, request):
+        last_synced = request.query_params.get('last_synced')
+        if not last_synced:
+            return Response({"error": "last_synced query param is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # parse the string datetime to Python datetime object
+        last_synced_dt = parse_datetime(last_synced)
+        if not last_synced_dt:
+            return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
+
+        activities = ActivityRecord.objects.filter(last_updated__gt=last_synced_dt)
+        deleted_activities = list(ActivityRecord.objects.filter(is_deleted=True).values_list('id', flat=True))
+
+        serializer = ActivityRecordSerializer(activities, many=True)
+        return Response({"activities": serializer.data, "deleted_activities": deleted_activities}, status=status.HTTP_200_OK)
+
 
 
 class ActivityRecordView(APIView):
@@ -22,16 +60,17 @@ class ActivityRecordView(APIView):
 
 
     def post(self, request):
+        print(request.data)
         serializer = ActivityRecordSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            activity = ActivityRecord.objects.get(id=request.data.get('id'))
 
-            print(request.data, 'request data')
 
             timestamp = datetime.fromisoformat(request.data.get('timestamp'))
             update_daily_goals(request.user, timestamp)
 
-            return Response({"message": "Activity recorded successfully"})
+            return Response({"message": "Activity recorded successfully", "calories_burned":activity.calories_burned})
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,10 +81,13 @@ class ActivityRecordView(APIView):
         if serializer.is_valid():
             serializer.save()
 
+            activity = ActivityRecord.objects.get(id=request.data.get('id'))
+
+
             timestamp = datetime.fromisoformat(request.data.get('timestamp'))
             update_daily_goals(request.user, timestamp, previous_timestamp)
 
-            return Response({"message": "Activity record updated successfully"})
+            return Response({"message": "Activity record updated successfully", "calories_burned":activity.calories_burned})
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

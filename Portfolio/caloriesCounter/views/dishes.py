@@ -1,6 +1,6 @@
 from rest_framework.response import Response
-from backend.models import Dish, Ingredient, Product
-from backend.serializers import DishSerializer, IngredientSerializer
+from backend.models import Dish, Ingredient, Product, DishMedia
+from backend.serializers import DishSerializer, IngredientSerializer, DishMediaSerializer
 from rest_framework.views import APIView
 from rest_framework import  status 
 from django.db.models import Sum  
@@ -21,8 +21,25 @@ class GetAllDishes(APIView):
 
     def get(self, request):
         try:
-            dishes = Dish.objects.filter(is_deleted=False).order_by('-id')
+            dishes = Dish.objects.filter(is_deleted=False)
             dishes_data = DishSerializer(dishes, many=True).data
+
+            media_qs = DishMedia.objects.filter(dish__in=dishes)
+            media_dict = {}
+
+            for media in media_qs:
+                media_data = DishMediaSerializer(media).data
+                dish_id_str = str(media.dish.id)
+                if dish_id_str not in media_dict:
+                    media_dict[dish_id_str] = []
+                media_dict[dish_id_str].append(media_data)
+
+            # Attach media
+            for dish in dishes:
+                dish['media'] = media_dict.get(str(dish['id']), [])
+
+
+            print(len(dishes_data), 'dishes send when pulling dishes')
             return Response({"dishes": dishes_data}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": "Failed to fetch dishes"}, status=status.HTTP_400_BAD_REQUEST)
@@ -42,7 +59,23 @@ class GetUpdatedDishes(APIView):
             return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch updated dishes and deleted ones
-        dishes = Dish.objects.filter(last_updated__gt=last_synced_dt)
+        dishes = Dish.objects.filter(last_updated__gt=last_synced_dt, is_deleted=False)
+
+        media_qs = DishMedia.objects.filter(dish__in=dishes)
+        media_dict = {}
+
+        for media in media_qs:
+            media_data = DishMediaSerializer(media).data
+            dish_id_str = str(media.dish.id)
+            if dish_id_str not in media_dict:
+                media_dict[dish_id_str] = []
+            media_dict[dish_id_str].append(media_data)
+
+        # Attach media
+        for dish in dishes:
+            dish['media'] = media_dict.get(str(dish['id']), [])
+
+
         deleted_dishes = list(Dish.objects.filter(is_deleted=True).values_list('id', flat=True))
 
         serializer = DishSerializer(dishes, many=True)
@@ -153,6 +186,21 @@ class DishView(APIView):
         for dish in dish_data:
             dish['ingredients'] = ingredient_dict.get(str(dish['id']), [])
 
+        # Optimize media fetching
+        media_qs = DishMedia.objects.filter(dish__id__in=dish_ids, is_deleted=False)
+        media_dict = {}
+
+        for media in media_qs:
+            media_data = DishMediaSerializer(media).data
+            dish_id_str = str(media.dish.id)
+            if dish_id_str not in media_dict:
+                media_dict[dish_id_str] = []
+            media_dict[dish_id_str].append(media_data)
+
+        # Attach media
+        for dish in dish_data:
+            dish['media'] = media_dict.get(str(dish['id']), [])
+
         
 
 
@@ -165,21 +213,22 @@ class DishView(APIView):
         data = request.data.dict()
         print(data)
 
-        productExists = Product.objects.filter(name=data.get('name'))
-        dishExists = Dish.objects.filter(name=data.get('name'))
+        # Uniqueness check
+        productExists = Product.objects.filter(name=data.get('name')).exists()
+        dishExists = Dish.objects.filter(name=data.get('name')).exists()
         if productExists or dishExists:
             return Response({"error": 'Product or dish with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-        if 'image' in request.FILES:
-            print('image is in files')
-            data['image'] = request.FILES['image']
-
         serializer = DishSerializer(data=data)
 
-        if serializer.is_valid(): 
+        if serializer.is_valid():
             dish = serializer.save()
+
+            # Save multiple media files
+            files = request.FILES.getlist('files')  # 👈 getlist to support multiple uploads
+            for file in files:
+                DishMedia.objects.create(dish=dish, file=file)
+
             return Response({"id": dish.id}, status=status.HTTP_201_CREATED)
 
         print(serializer.errors)
@@ -194,17 +243,18 @@ class DishView(APIView):
 
         data = request.data.dict()
 
-        if 'image' in request.FILES:
-            print('image is in files')
-            data['image'] = request.FILES['image']
-
-
-
         serializer = DishSerializer(dish, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
+
+            # Save any new media files
+            files = request.FILES.getlist('files')
+            for file in files:
+                DishMedia.objects.create(dish=dish, file=file)
+
             return Response({"message": "Dish updated successfully"}, status=status.HTTP_200_OK)
+
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

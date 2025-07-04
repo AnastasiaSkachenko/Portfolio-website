@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Skill, Product, Ingredient, Dish, DiaryRecord, User, ActivityRecord , DailyGoals
+from .models import Project, Skill, Product, Ingredient, Dish, DiaryRecord, User, ActivityRecord , DailyGoals, ProductMedia, DishMedia
 from django.contrib.auth.hashers import make_password
 
 
@@ -42,6 +42,16 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+class ProductMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductMedia
+        fields = ['id', 'file', 'media_type']
+
+class ProductMediaUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductMedia
+        fields = ['file']
+
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -52,6 +62,19 @@ class DishSerializer(serializers.ModelSerializer):
         model = Dish
         fields = '__all__'
 
+
+class DishMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DishMedia
+        fields = ['id', 'file', 'media_type']
+
+class DishMediaUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DishMedia
+        fields = ['file']
+
+
+
 class DiarySerializer(serializers.ModelSerializer):
     class Meta:
         model = DiaryRecord
@@ -60,7 +83,7 @@ class DiarySerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 'fiber_d', 'sugars_d', 'caffein_d', 'height', 'weight', 'activity_level', 'email', 'gender', 'goal', "balance", "bmr"]
+        fields = ['id', 'name', 'age', 'image', 'calories_d', 'protein_d', 'carbs_d', 'fat_d', 'fiber_d', 'sugars_d', 'caffeine_d', 'height', 'weight', 'activity_level', 'email', 'gender', 'goal', "balance", "bmr"]
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  # Ensures password isn't returned in the response
@@ -69,7 +92,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'age', 'email', 'password', 'image', 
-                  'calories_d', 'protein_d', 'carbohydrate_d', 'fat_d', 
+                  'calories_d', 'protein_d', 'carbs_d', 'fat_d', 'fiber_d', 'sugars_d', 'caffeine_d',
                   'height', 'weight', 'activity_level', 'gender', 'goal']
 
     def create(self, validated_data):

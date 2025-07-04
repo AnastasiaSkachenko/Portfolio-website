@@ -152,6 +152,7 @@ class GetUserView(APIView):
         favorite_dish_ids = user.favorite_dishes.values_list("id", flat=True)
 
         # Response with user info and new access token (if refreshed)
+        print('user', UserSerializer(user).data)
         response_data = {
             "user": UserSerializer(user).data,
             "favoriteDishes": list(favorite_dish_ids),

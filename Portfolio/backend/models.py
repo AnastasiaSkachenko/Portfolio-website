@@ -21,11 +21,11 @@ class User(AbstractUser):
     age = models.IntegerField(default=18)
     calories_d = models.IntegerField(null=True)
     protein_d = models.IntegerField(null=True)
-    carbohydrate_d = models.IntegerField(null=True)
+    carbs_d = models.IntegerField(null=True)
     fat_d = models.IntegerField(null=True)
     fiber_d = models.DecimalField(max_digits=10, decimal_places=1, default=0)
     sugars_d = models.DecimalField(max_digits=10, decimal_places=1, default=0)
-    caffein_d = models.DecimalField(max_digits=10, decimal_places=1, default=0)
+    caffeine_d = models.DecimalField(max_digits=10, decimal_places=1, default=0)
 
     height = models.IntegerField(null=True, blank=True)
     weight = models.IntegerField(default=0)
@@ -122,7 +122,25 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
 
+class ProductMedia(models.Model):
+    product = models.ForeignKey(Product, related_name="media", on_delete=models.CASCADE)
+    file = models.FileField(upload_to="product_media/")
 
+    # optional: identify type
+    MEDIA_TYPE_CHOICES = (
+        ('image', 'Image'),
+        ('video', 'Video'),
+    )
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
+
+    def save(self, *args, **kwargs):
+        if not self.media_type:
+            # infer type from file extension
+            if self.file.name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                self.media_type = 'image'
+            elif self.file.name.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
+                self.media_type = 'video'
+        super().save(*args, **kwargs)
 
 
 class DishOld(models.Model):
@@ -218,6 +236,26 @@ class Dish(models.Model):
         if self.weight_of_ready_product is None:  # Set default only if not provided
             self.weight_of_ready_product = self.weight
         
+        super().save(*args, **kwargs)
+
+class DishMedia(models.Model):
+    dish = models.ForeignKey(Dish, related_name="media", on_delete=models.CASCADE)
+    file = models.FileField(upload_to="dish_media/")
+
+    # optional: identify type
+    MEDIA_TYPE_CHOICES = (
+        ('image', 'Image'),
+        ('video', 'Video'),
+    )
+    media_type = models.CharField(max_length=10, choices=MEDIA_TYPE_CHOICES)
+
+    def save(self, *args, **kwargs):
+        if not self.media_type:
+            # infer type from file extension
+            if self.file.name.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                self.media_type = 'image'
+            elif self.file.name.lower().endswith(('.mp4', '.mov', '.avi', '.webm')):
+                self.media_type = 'video'
         super().save(*args, **kwargs)
 
 
@@ -383,6 +421,8 @@ class ActivityRecord(models.Model):
     name = models.CharField(max_length=150, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     done = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(default=None, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.calories_burned:
@@ -391,15 +431,15 @@ class ActivityRecord(models.Model):
 
 
 class DailyGoals(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(default=None, null=True, blank=True)
     calories_burned = models.PositiveIntegerField(default=0)    
     calories_burned_goal = models.PositiveIntegerField(default=0)
     protein = models.PositiveIntegerField(default=0)    
     protein_goal = models.PositiveIntegerField(default=0)
-    carbohydrate = models.PositiveIntegerField(default=0)    
-    carbohydrate_goal = models.PositiveIntegerField(default=0)
+    carbs = models.PositiveIntegerField(default=0)    
+    carbs_goal = models.PositiveIntegerField(default=0)
     fat = models.PositiveIntegerField(default=0)    
     fat_goal = models.PositiveIntegerField(default=0)
     fiber = models.PositiveIntegerField(default=0)

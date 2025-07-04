@@ -4,7 +4,8 @@ from .views.users import RegisterView,  LogoutView, ModifyUserView, GetUserView,
 from .views.products import ProductView,  GetProductNames, CheckProductExistsView, GetUpdatedProducts, GetAllProducts, ping
 from .views.dishes import  DishView, GetDishNames, IsNameUnique,  getDishById, ToggleFavorite, GetAllDishes, GetUpdatedDishes
 from .views.ingredients import  IngredientView, getIngredientsInDish, GetAllIngredients, GetUpdatedIngredients
-from .views.activity import ActivityRecordView
+from .views.activity import ActivityRecordView, GetAllActivities, GetUpdatedActivities
+from .views.statistics import get_monthly_nutrition_stats
 
 
 
@@ -12,11 +13,14 @@ from .views.activity import ActivityRecordView
 urlpatterns = [
     path("ping/", ping),
 
-
     path('dailyGoals/', DailyGoalView.as_view()),
 
-
     path('activityRecords/', ActivityRecordView.as_view()),
+    path('activityRecords-all/', GetAllActivities.as_view(), name='getAllActivityRecords'), 
+    path('activityRecords-updated/', GetUpdatedActivities.as_view(), name='getUpdatedActivityRecords'), 
+
+    path('statistics/', get_monthly_nutrition_stats, name='getMonthlyNutritionStats'),
+
 
     path('test/', TestingHere.as_view()),
 

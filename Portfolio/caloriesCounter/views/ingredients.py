@@ -97,7 +97,7 @@ class IngredientView(APIView):
         ingredient = get_object_or_404(Ingredient, id=id) 
         data = request.data.copy()
 
-        for field in ['calories', 'protein', 'carbohydrate', 'fat', 'fiber', 'sugars', 'caffein']:
+        for field in ['calories', 'protein', 'carbs', 'fat', 'fiber', 'sugars', 'caffein']:
             if data.get(field) == '':
                 data[field] = 0
 
@@ -139,7 +139,7 @@ def getIngredientsInDish(request):
                 'name': ingredient.product.name,
                 'calories': ingredient.calories,
                 'protein': ingredient.protein,
-                'carbohydrate': ingredient.carbohydrate,
+                'carbs': ingredient.carbs,
                 'fat': ingredient.fat,
                 'product': ingredient.product.id,
                 'weight': ingredient.weight

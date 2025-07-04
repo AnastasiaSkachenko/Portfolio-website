@@ -1,5 +1,5 @@
 from celery import shared_task
-from backend.models import Dish, User, DiaryRecord, DailyGoals
+from backend.models import Dish, User, DiaryRecord, DailyGoals, Product, Ingredient, ActivityRecord
 from django.db.models import Count
 from django.utils.timezone import now
 from datetime import timedelta
@@ -127,8 +127,29 @@ def update_calories_balance():
     )
 
 
+@shared_task
+def swipe_deleted_instances():
+    """
+    Celery task to permanently delete all soft-deleted instances.
+    This helps keep the database clean by removing entries where is_deleted=True.
+    """
 
+    # Query each model for soft-deleted entries
+    products = list(Product.objects.filter(is_deleted=True))
+    dishes = list(Dish.objects.filter(is_deleted=True))
+    ingredients = list(Ingredient.objects.filter(is_deleted=True))
+    diary_records = list(DiaryRecord.objects.filter(is_deleted=True))
+    activity_records = list(ActivityRecord.objects.filter(is_deleted=True))
 
+    # Combine all the instances to delete into a single list
+    instances_to_delete = products + dishes + ingredients + diary_records + activity_records
+
+    if instances_to_delete:
+        for instance in instances_to_delete:
+            # Optional: use instance.delete(hard=True) if your delete method is overridden
+            instance.delete()
+
+    print(f'Deleted {len(instances_to_delete)} soft-deleted instances')
 
 @shared_task
 def update_goals():
@@ -156,6 +177,8 @@ def update_goals():
         total_caffeine=Sum('caffein'),
     )
 
+    print("Totals: ", totals)
+
     # Ensure no nulls
     consumed = {
         'calories': totals['total_calories'] or 0,
@@ -164,18 +187,21 @@ def update_goals():
         'fats': totals['total_fats'] or 0,
         'sugars': totals['total_sugar'] or 0,
         'fiber': totals['total_fiber'] or 0,
-        'caffein': totals['total_caffeine'] or 0,
+        'caffeine': totals['total_caffeine'] or 0,
     }
 
+    print("Consumed: ", consumed)
+
+
         # 3. Update DailyGoals entry for that date
-    daily_goals, _ = DailyGoals.objects.get_or_create(user=user, date=yesterday.date(), id=uuid.uuid4())
+    daily_goals, _ = DailyGoals.objects.get_or_create(user=user, date=yesterday.date())
     daily_goals.calories_intake = consumed['calories']
     daily_goals.protein = consumed['protein']
-    daily_goals.carbohydrate = consumed['carbs']
+    daily_goals.carbs = consumed['carbs']
     daily_goals.fat = consumed['fats']
     daily_goals.sugars = consumed['sugars']
     daily_goals.fiber = consumed['fiber']
-    daily_goals.caffeine = consumed['caffein']
+    daily_goals.caffeine = consumed['caffeine']
     daily_goals.save()
 
     # 4. Send email with summary

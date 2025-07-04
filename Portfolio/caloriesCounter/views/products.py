@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.response import Response
-from backend.models import Product, Dish
-from backend.serializers import ProductSerializer, DishSerializer
+from backend.models import Product, Dish, ProductMedia
+from backend.serializers import ProductSerializer, DishSerializer, ProductMediaSerializer
 from rest_framework.views import APIView
 from rest_framework import  status 
 from django.shortcuts import get_object_or_404 
@@ -9,8 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
 from django.utils.dateparse import parse_datetime 
 
-
-
+ 
 class GetAllProducts(APIView): 
     permission_classes = []
 
@@ -19,11 +18,34 @@ class GetAllProducts(APIView):
             products = Product.objects.filter(is_deleted=False).order_by('-id')
             products_data = ProductSerializer(products, many=True).data
 
+            # fetch media
+            media_qs = ProductMedia.objects.filter(product__in=products)
+            media_dict = {}
 
-            return Response({"products":products_data}, status=200)
-        except:
-            return Response({"error": 'Failed to fetch products'}, status=status.HTTP_400_BAD_REQUEST)
 
+            for media in media_qs:
+                # Only get the URL/URI
+                uri = media.file.url  # or media.image.url if your field is called `image`
+                product_id_str = str(media.product_id)
+                if product_id_str not in media_dict:
+                    media_dict[product_id_str] = []
+                media_dict[product_id_str].append(uri)
+
+
+            # attach media to serialized data
+            for product in products_data:
+                product['media'] = media_dict.get(str(product['id']), [])
+
+            print(len(products), 'length, products')
+            print(products_data)
+            return Response({"products": products_data}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            print('Error fetching products:', e)
+            return Response(
+                {"error": 'Failed to fetch products'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 def ping(request):
@@ -58,9 +80,29 @@ class ProductView(APIView):
                 paginated_products = products
                 has_more = False
 
-            products_data = ProductSerializer(paginated_products, many=True).data
 
-            return Response({"products": products_data, "has_more": has_more}, status=200)
+            media_qs = ProductMedia.objects.filter(product__in=paginated_products, is_deleted=False)
+            media_dict = {}
+
+            for media in media_qs:
+                # Only get the URL/URI
+                uri = media.file.url  # or media.image.url if your field is called `image`
+                product_id_str = str(media.product_id)
+                if product_id_str not in media_dict:
+                    media_dict[product_id_str] = []
+                media_dict[product_id_str].append(uri)
+
+
+            products_data = ProductSerializer(paginated_products, many=True)
+
+
+            # Attach media
+            for product in products_data:
+                product['media'] = media_dict.get(str(product['id']), [])
+
+
+            
+            return Response({"products": products_data.data, "has_more": has_more}, status=200)
         except:
             return Response({"error": 'Failed to fetch products'}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -76,27 +118,32 @@ class ProductView(APIView):
             elif key.startswith('dish_'):
                 dish_data[key.replace('dish_', '')] = value
 
-        # Handle file separately
-        if 'product_image' in request.FILES:
-            product_data['image'] = request.FILES['product_image']
-        if 'dish_image' in request.FILES:
-            dish_data['image'] = request.FILES['dish_image']
-
         for field in ['calories', 'protein', 'carbs', 'fat', 'fiber', 'sugars', 'caffeine']:
             if product_data.get(field) == '':
                 product_data[field] = 0
 
-        print(product_data, 'product data')
         serializer = ProductSerializer(data=product_data)
 
         if serializer.is_valid():
             product_instance = serializer.save()
+
+            # save uploaded media files
+            media_files = request.FILES.getlist('product_media')  # 👈 allow multiple files
+            for file in media_files:
+                media_type = 'video' if file.content_type.startswith('video/') else 'image'
+                print('media file', file)
+                ProductMedia.objects.create(
+                    product=product_instance,
+                    file=file,
+                    media_type=media_type
+                )
+
             source = request.headers.get("X-App-Source")
             if source == "web":
                 Dish.objects.create(
                     product=product_instance,
                     name=product_data.get('name'),
-                    image=product_instance.image,
+                    image=None,  # optional: or set to first image
                     calories=product_data.get('calories', 0),
                     calories_100=product_data.get('calories', 0),
                     protein=product_data.get('protein', 0),
@@ -125,41 +172,49 @@ class ProductView(APIView):
 
         print(serializer.errors)
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        
     def put(self, request):
         product_id = request.query_params.get('id')
         product = get_object_or_404(Product, id=product_id)
 
-        # Flatten the form data
-        raw_data = request.data.copy()  # QueryDict to mutable dict
+        raw_data = request.data.copy()
         product_data = {}
         dish_data = {}
 
-        # Separate product_ and dish_ fields
         for key, value in raw_data.items():
             if key.startswith("product_"):
                 product_data[key.replace("product_", "")] = value
             elif key.startswith("dish_"):
                 dish_data[key.replace("dish_", "")] = value
 
-        # Handle image file for product
-        if 'product_image' in request.FILES:
-            product_data['image'] = request.FILES['product_image']
-
-        # Replace empty string with 0 for numeric fields
-        for field in ['calories', 'protein', 'carbohydrate', 'fat', 'fiber', 'sugars', 'caffein']:
+        for field in ['calories', 'protein', 'carbs', 'fat', 'fiber', 'sugars', 'caffeine']:
             if product_data.get(field) == '':
                 product_data[field] = 0
 
-        # Update Product
         serializer = ProductSerializer(product, data=product_data, partial=True)
 
         if serializer.is_valid():
             product_instance = serializer.save()
+
+            # save new uploaded media files
+            media_files = request.FILES.getlist('product_media')
+            for file in media_files:
+                media_type = 'video' if file.content_type.startswith('video/') else 'image'
+                ProductMedia.objects.create(
+                    product=product_instance,
+                    file=file,
+                    media_type=media_type
+                )
+
+            # optional: delete media
+            media_to_delete = request.data.getlist('media_to_delete')  # e.g., list of media IDs
+            if media_to_delete:
+                ProductMedia.objects.filter(id__in=media_to_delete, product=product_instance).delete()
+
+            # update Dish as before
             source = request.headers.get("X-App-Source")
 
             if source == "web":
-                # Update corresponding dish fields from updated product
                 dish = Dish.objects.get(product=product_instance)
                 dish.name = product_instance.name
                 dish.calories = product_instance.calories
@@ -178,7 +233,6 @@ class ProductView(APIView):
                 dish.caffeine_100 = product_instance.caffeine
                 dish.save()
             else:
-                # Mobile: update dish using nested dish form data
                 dish_id = dish_data.get('id')
                 if not dish_id:
                     return Response({"message": "Dish ID is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -222,23 +276,55 @@ class GetProductNames(APIView):
 
 class GetUpdatedProducts(APIView):
     permission_classes = []  
-
     def get(self, request):
         last_synced = request.query_params.get('last_synced')
         if not last_synced:
-            return Response({"error": "last_synced query param is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # parse the string datetime to Python datetime object
+            return Response(
+                {"error": "last_synced query param is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # parse to datetime
         last_synced_dt = parse_datetime(last_synced)
         if not last_synced_dt:
-            return Response({"error": "Invalid datetime format for last_synced"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Invalid datetime format for last_synced"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        # fetch updated products
         products = Product.objects.filter(last_updated__gt=last_synced_dt)
-        deleted_products = list(Product.objects.filter(is_deleted=True).values_list('id', flat=True))
 
-        # Assuming you have a ProductSerializer
+        # prefetch media into a dict
+        media_qs = ProductMedia.objects.filter(product__in=products)
+        media_dict = {}
+        for media in media_qs:
+            # Only get the URL/URI
+            uri = media.file.url  # or media.image.url if your field is called `image`
+            product_id_str = str(media.product_id)
+            if product_id_str not in media_dict:
+                media_dict[product_id_str] = []
+            media_dict[product_id_str].append(uri)
+
+
+        # deleted products ids
+        deleted_products = list(
+            Product.objects.filter(is_deleted=True).values_list('id', flat=True)
+        )
+
+        # serialize products
         serializer = ProductSerializer(products, many=True)
-        return Response({"products": serializer.data, "deleted_products": deleted_products}, status=status.HTTP_200_OK)
+
+        # inject media into serialized data
+        serialized_data = serializer.data
+        for item in serialized_data:
+            item['media'] = media_dict.get(str(item['id']), [])
+
+        print(serialized_data)
+        return Response(
+            {"products": serialized_data, "deleted_products": deleted_products},
+            status=status.HTTP_200_OK
+        )
 
 class CheckProductExistsView(APIView):
     permission_classes = [AllowAny]  # Publicly accessible

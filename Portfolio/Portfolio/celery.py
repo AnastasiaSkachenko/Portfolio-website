@@ -23,5 +23,9 @@ celery_app.conf.beat_schedule = {
         "task": "caloriesCounter.tasks.update_goals",
         "schedule": crontab(hour=1, minute=20)
     },
+    "swipe-deleted-instances": {
+        "task": "caloriesCounter.tasks.swipe_deleted_instances",
+        "schedule": crontab(day_of_week=1)
+    }
 
 }

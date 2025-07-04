@@ -14,6 +14,7 @@ MET_VALUES = {
     'volleyball': 4.0,
     'stretching': 2.5,
     'jumping': 8.0,
+    'home_chores': 3,
 }
 
 def calculate_calories_from_activity_record(record):
@@ -63,6 +64,7 @@ def calculate_calories_from_activity_record(record):
     
     if activity_type == 'home_chores' and duration_minutes:
         duration_hours = duration_minutes / 60
+        print('MET', met)
         return round(met * weight_kg * duration_hours, 0)
 
 

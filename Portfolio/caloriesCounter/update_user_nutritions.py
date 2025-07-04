@@ -14,7 +14,7 @@ def update_daily_goals(user, timestamp, previous_timestamp=None):
     """
     Update or create DailyGoals for user on relevant dates.
     """
-    print('----------------------/n/n')
+    print('----------------------\n\n')
 
 
     def safe_value(value, default, min_value=None, max_value=None):
@@ -84,7 +84,7 @@ def update_daily_goals(user, timestamp, previous_timestamp=None):
         fat_calories = fat_goal * 9
 
         remaining_calories = max(total_calories - (protein_calories + fat_calories), 0)
-        carbohydrate_goal = round(remaining_calories / 4)
+        carbs_goal = round(remaining_calories / 4)
 
         sugar_goal = round((total_calories * 0.10) / 4)
         fiber_goal = round((total_calories / 1000) * 14)
@@ -106,7 +106,7 @@ def update_daily_goals(user, timestamp, previous_timestamp=None):
                 'calories_burned_goal': total_burned_goal,
                 'calories_intake_goal': total_calories_goal,
                 'protein_goal': protein_goal,
-                'carbohydrate_goal': carbohydrate_goal,
+                'carbs_goal': carbs_goal,
                 'fat_goal': fat_goal,
                 'sugars_goal': sugar_goal,
                 'fiber_goal': fiber_goal,
@@ -116,8 +116,6 @@ def update_daily_goals(user, timestamp, previous_timestamp=None):
         print(daily_goals.calories_intake_goal, 'daily goal calories intake goal')
         print(daily_goals.date, 'daily goal date')
 
-        if created: 
-            print('daily goals is created')
         return daily_goals
 
     if user is None or timestamp is None:
@@ -209,7 +207,7 @@ def update_user_nutrition(user):
 
     # 6. Carbohydrates
     remaining_calories = total_calories - (protein_calories + fat_calories)
-    carbohydrate_d = round(remaining_calories / 4)
+    carbs_d = round(remaining_calories / 4)
 
     # 7. Sugars (10% of calories)
     sugar_d = round((total_calories * 0.10) / 4)
@@ -223,11 +221,11 @@ def update_user_nutrition(user):
     # Save values to user
     user.calories_d = total_calories
     user.protein_d = protein_d
-    user.carbohydrate_d = carbohydrate_d
+    user.carbs_d = carbs_d
     user.fat_d = fat_d
     user.sugars_d = sugar_d
     user.fiber_d = fiber_d
-    user.caffein_d = caffeine_mg
+    user.caffeine_d = caffeine_mg
     user.save()
 
     return user
