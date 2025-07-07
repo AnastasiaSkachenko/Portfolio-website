@@ -1,2 +1,19 @@
+# Environment & OS files
 .env
 .DS_Store
+venv/
+
+# Static and media files (generated / collected)
+static/
+staticfiles/
+media/
+
+# Python bytecode & logs
+*.log
+*.pyc
+*.pyo
+__pycache__/
+
+# Celery & Redis files
+celerybeat-schedule.db
+dump.rdb
